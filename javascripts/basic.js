@@ -79,10 +79,10 @@ var $ = function(selector) {
 
 
     	 // // 3s自动轮播
-    	 var autoplay = setInterval(function() {
-    	 	// 下一页
-    	 	slider.next();
-    	 }, 15000);
+    	 // var autoplay = setInterval(function() {
+    	 // 	// 下一页
+    	 // 	slider.next();
+    	 // }, 15000);
 
 
     	 // 直接跳到第二页
