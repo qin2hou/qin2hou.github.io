@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ladder</title>
+	<link rel="stylesheet" href="../base.css">
+	<style>
+		html {
+			background: black;
+		}
+		.ladder p {
+			position: relative;
+			left: -0.8em;
+			margin: 0;
+			height: 1em;
+			color: white;
+			font-size: 60px;
+			font-weight: bold;
+			font-family: sans-serif;
+			text-transform: uppercase;			
+			overflow: hidden;			
+		}
+		.ladder span {		
+			display: block;	
+			line-height: 1em;
+			text-align: center;	
+			animation: move 3s ease-in-out infinite alternate;		
+		}
+		.ladder p:nth-child(odd) {
+			transform: skewY(-30deg) skewX(45deg) scaleY(1.3333);
+		}
+		.ladder p:nth-child(even) {
+			transform: skewY(-30deg) scaleY(1.3333);
+		}
+		.ladder p:nth-child(2) {
+			margin-left: 1.3em;
+		}
+		.ladder p:nth-child(3) {
+			margin-left: 2.6em;
+		}
+		@keyframes move {
+			to {
+				transform:translateY(-100%)
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="ladder">
+		<p>
+			<span>stay</span>
+			<span>hungry</span>
+		</p>
+		<p>
+			<span>hungry</span>
+			<span>stay</span>
+		</p>
+		<p>
+			<span>stay</span>
+			<span>foolish</span>
+		</p>
+	</div>
+</body>
+</html>

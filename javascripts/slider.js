@@ -84,7 +84,7 @@
     var template =
      `<div class="m-slider">
             <div class="slide">
-                <a>
+                <a href="#" target="_blank" title="打开新的页面，可以查看源码">
                     <img />
                     <div class="text">
                         <h2 class="header"></h2>
@@ -93,7 +93,7 @@
                 </a>                
             </div>
             <div class="slide">
-                <a>                    
+                <a href="#" target="_blank" title="打开新的页面，可以查看源码">                    
                     <img />
                     <div class="text">
                         <h2 class="header"></h2>
@@ -102,7 +102,7 @@
                 </a>
             </div>
             <div class="slide">
-                <a>
+               <a href="#" target="_blank" title="打开新的页面，可以查看源码">
                     <img />
                     <div class="text">
                         <h2 class="header"></h2>
@@ -281,6 +281,7 @@
             var slides = this.slides;
             var titles = this.titles;
             var descriptions = this.descriptions;
+            var links = this.links;
 
             for (var i=-1;i<=1;i ++) {
                 var index = (slideIndex + i +3)%3; // slideIndex 初始时是1，所以此处index为 0~2循环。
@@ -291,11 +292,13 @@
                 }
                 var header = slides[index].querySelector('.header');
                 var desc = slides[index].querySelector('.description');
+                var link = slides[index].querySelector('a');
 
                 header.innerHTML = titles[this._normIndex(pageIndex + i, this.pageNum)];
                 desc.innerHTML = descriptions[this._normIndex(pageIndex + i, this.pageNum)];
                 img.src = images[this._normIndex(pageIndex + i, this.pageNum)];
 
+                link.href = links[this._normIndex(pageIndex + i, this.pageNum)];
                 //  console.log(img.src);
                 // img.src = './images/00' + (this._normIndex(pageIndex + i, this.pageNum)+1) + '.jpg'; 
                 //slideIndex[1]的位置 取出第 pageIndex 张图，并且相邻的slide对应相邻的图片

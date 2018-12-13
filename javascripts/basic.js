@@ -53,7 +53,15 @@ var $ = function(selector) {
     	 		'1.熊猫脸只需要一个dom节点制作；<br />2.熊猫的两只眼睛通过伪元素制作，而耳朵巧妙的使用了伪元素的阴影完成；<br />3.眼珠、嘴和鼻子是通过背景的radial-gradient完成。',
     	 		'1.月亮和太阳分别用一个节点制作；<br />2.动画的实现是通过背景的颜色、太阳的颜色和月亮的颜色协同变化完成的。',
     	 		'1.需要三个节点来制作，相邻节点的首尾是重复的文字，这样文字的移动之后才会衔接在一起；<br />2.除了调整skew之外，还调整了scale，最后看上去才觉得自然。',
-    	 	]
+    	 	],
+
+            links: [
+                './daily_exercise/Day13/index.html',
+                './daily_exercise/Day24/index.html',
+                './daily_exercise/Day35/index.html',
+                './daily_exercise/Day36/index.html',
+                './daily_exercise/Day38/index.html'
+            ]
 
     	 });
     	 // 通过监听'nav'事件来完成额外逻辑, 此处是给当前的导航添加样式

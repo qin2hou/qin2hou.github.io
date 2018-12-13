@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>wave</title>
+	<link rel="stylesheet" href="../base.css">
+	<style>
+		html {
+			background: linear-gradient(antiquewhite, navajowhite);
+		}
+
+		.card {
+			width: 300px;
+			height: 300px;
+			background-color: whitesmoke;
+			background-image: linear-gradient(
+				darkblue,
+				rgba(255,255,255,0) 75%,
+				rgba(255,255,255,0.5)
+			);
+			border-radius: 5px;
+			box-shadow: 0 2px 30px rgba(0,0,0,0.2);
+			position: relative;
+			overflow: hidden;
+		}
+
+
+
+
+		.card .wave {
+			position: absolute;
+			width: 200%;
+			height:200%;
+			top: -125%;
+			left: -50%;	
+			border-radius: 43%;
+			background-color: deepskyblue;
+			filter: opacity(0.4);
+			animation: wave linear infinite;
+			transform-origin: 50% 48%;
+		}
+		.card .wave:nth-of-type(1) {
+			animation-duration: 5s;
+		}
+		.card .wave:nth-of-type(2) {
+			animation-duration: 7s;
+		}
+		.card .wave:nth-of-type(3) {
+			animation-duration: 9s;
+			background-color: orangered;
+			filter: opacity(0.1);
+		}
+
+
+		.card p {
+			position: absolute;
+			color: white;
+			text-align: center;
+			width: 100%;
+			font-size: 24px;
+			line-height:260px;
+			font-family: serif;
+			letter-spacing: 0.4em;
+			text-transform: uppercase;
+			z-index: 1;
+		}
+
+		@keyframes wave {
+			from {
+				transform: rotate(360deg);
+			}
+		}
+
+
+	</style>
+</head>
+<body>
+	<div class="card">
+		<p>The sea</p>
+		<span class="wave"></span>
+		<span class="wave"></span>
+		<span class="wave"></span>
+	</div>
+</body>
+</html>
