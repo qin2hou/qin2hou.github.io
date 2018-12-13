@@ -1,7 +1,7 @@
 # 个人主页 qin2hou.github.io
 欢迎来访~
 
-links: qin2hou.github.io
+links: <a>qin2hou.github.io</a>
 
 主要内容包括:
   1.部分CSS动画练习
