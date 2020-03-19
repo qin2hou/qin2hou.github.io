@@ -2,42 +2,18 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>周勤的主页</title>
-	<link rel="stylesheet" href="styles/basic.css">
+	<title>my clock</title>
+	<link rel="stylesheet" href="css/style.css">
 </head>
-<body>		
-	<div class="side">		
+<body>
+	<div class="fullscreen" id="fullscreen">
 		<div class="clock" id="clock">
-			<div class="dial"></div>
-			<div class="minute"></div>
-			<div class="hour"></div>
+			<div id="hours" class="time hours" title="点击可切换12小时制/24小时制"></div>
+			<div id="minutes" class="time minutes"></div>
+			<div id="pm" class="pm" style="">PM</div>
 		</div>
-		<div class="slogon" id="slogon">"It's a beautiful day.<br/>Don't let it get away."</div>		
-		<nav  class="nav">
-			<ul> 
-				<li class="highlight"><a href="index.html#">CSS 动画练习</a></li>
-				<li><a href="ego/html/index.html">页面临摹练习</a></li>
-			</ul>
-		</nav>
-		<div class="thanks">
-			<span>------- 特别感谢 -------</span><br><br>
-			@tango2010<br>
-			@comehope<br>
-			@网易云课堂
-		</div>	
 	</div>
-	<div class="main">
-		<ul class="m-cursor">
-			<li class="prev"><</li>		
-			<li class="cursor">1</li>
-			<li class="cursor">2</li>
-			<li class="cursor">3</li>
-			<li class="cursor">4</li>
-			<li class="cursor">5</li>
-			<li class="next">></li>				
-		</ul> 	
-	</div>
-	<script src="javascripts/slider.js"></script>
-	<script src="javascripts/basic.js"></script>
+	
+	<script type="text/javascript" src="js/script.js"></script>
 </body>
 </html>
