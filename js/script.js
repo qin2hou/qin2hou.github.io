@@ -1,7 +1,8 @@
 (function() {
     var model = {
         time: {},
-        isPm: false, // 默认24小时制
+        isMilitaryTime: true, // 默认24小时制
+        timeAbbr: "",
         lastestMinutes: undefined,
         toastTime: 1.8 // 单位秒,取一位小数
     };
@@ -18,7 +19,7 @@
             timeObj.month = octopus.addZero(time.getMonth() + 1);
             timeObj.day = octopus.addZero(time.getDate());
             timeObj.hours = time.getHours();
-            // timeObj.hours = 6;
+            // timeObj.hours = 0; // 调试24小时制
             timeObj.minutes = octopus.addZero(time.getMinutes());
             // timeObj.minutes = 12;
             timeObj.seconds = octopus.addZero(time.getSeconds());
@@ -31,18 +32,23 @@
                 return time;
             }
         },
-        translatePm: function(timeObj) {
-            if ( timeObj.hours >= 12 ) {
+        translateTwelveHour: function(timeObj) {
+            if(timeObj.hours > 12){
                 timeObj.hours = timeObj.hours - 12;
-            }
+                model.timeAbbr = "PM";
+            }else if (timeObj.hours == 12){
+                model.timeAbbr = "PM";
+            }else {
+                model.timeAbbr = "AM";
+            }   
             return timeObj;
         },
         updateTime: function() {
             var t = setInterval(function() {
                 model.lastestMinutes = model.time.minutes;
                 octopus.getCurrentTime(model.time);
-                if (model.isPm) {
-                    octopus.translatePm(model.time);
+                if (!model.isMilitaryTime) {
+                    octopus.translateTwelveHour(model.time);
                 };
                 if (model.toastTime > 0) {
                     model.toastTime = model.toastTime - 0.1;
@@ -50,11 +56,11 @@
                 view.render();
             }, 100);
         },
-        togglePm: function() {
-            model.isPm = !model.isPm;
-            if (model.isPm) {
-                octopus.translatePm(model.time);
-            };
+        toggleHourSystems: function() {
+            model.isMilitaryTime = !model.isMilitaryTime;
+            if (!model.isMilitaryTime) {         
+                octopus.translateTwelveHour(model.time);
+            }
             view.render();
         }
     };
@@ -70,7 +76,7 @@
             view.minutesElem.innerText = model.time.minutes;
             view.messageElem.innerText =  "按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏";
             view.hoursElem.addEventListener("click", function() {
-                octopus.togglePm();
+                octopus.toggleHourSystems();
             });
 
             document.onkeydown = function(event) {
@@ -88,10 +94,10 @@
             octopus.updateTime();
         },
         render: function() {
-            if (model.isPm) {
-                view.showPm();
+            if (model.isMilitaryTime) {
+                view.hideAbbr();
             }else {
-                view.hidePm();
+                view.showAbbr();
             };
             if (view.hoursElem.innerText != model.time.hours) {
                 view.hoursElem.innerText = model.time.hours;
@@ -101,18 +107,15 @@
             };
             if(model.toastTime <=0 ){
                 view.hideMessage();
-                // model.toastTime=5;
             }
         },
-        showPm: function() {
-            // console.log(view.hoursElem.innerText);
-            view.pmElem.style.display = 'block';
+        showAbbr: function() {
+            view.pmElem.innerText = model.timeAbbr;
         },
-        hidePm: function() {
-            view.pmElem.style.display = 'none';
+        hideAbbr: function() {
+            view.pmElem.innerText = "";
         },
         showMessage: function() {
-            // console.log(view.hoursElem.innerText);
             view.messageElem.style.display = 'block';
         },
         hideMessage: function() {
