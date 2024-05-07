@@ -19,7 +19,7 @@
             timeObj.month = octopus.addZero(time.getMonth() + 1);
             timeObj.day = octopus.addZero(time.getDate());
             timeObj.hours = time.getHours();
-            // timeObj.hours = 0; // 调试24小时制
+            //timeObj.hours = 0; // 调试24小时制
             timeObj.minutes = octopus.addZero(time.getMinutes());
             // timeObj.minutes = 12;
             timeObj.seconds = octopus.addZero(time.getSeconds());
@@ -38,9 +38,12 @@
                 model.timeAbbr = "PM";
             }else if (timeObj.hours == 12){
                 model.timeAbbr = "PM";
+            }else if (timeObj.hours == 0){
+                timeObj.hours = 12;
+                model.timeAbbr = "AM";
             }else {
                 model.timeAbbr = "AM";
-            }   
+            }
             return timeObj;
         },
         updateTime: function() {
