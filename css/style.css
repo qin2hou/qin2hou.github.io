@@ -8,6 +8,8 @@ html, body {
 	background-color: #000;
 	overflow: hidden;
 	font-family: "Helvetica Condensed Bold";
+	text-align: center;
+	vertical-align: middle;
 }
 .fullscreen {
 	position: relative;
@@ -17,6 +19,34 @@ html, body {
 @font-face {
 	font-family: "Helvetica Condensed Bold";
 	src: url("../font/Helvetica Condensed Bold.ttf");
+}
+.message:before{
+	z-index: 1;
+	content: "";
+	position: absolute;
+	left: 57px;
+	top: 7px;
+	width: 38px;
+	height:28px;
+	border-radius: 4px;
+	border: 1px solid ;
+}
+.message{
+	position: absolute;
+	top: -540px;
+	bottom: 0px;
+	right: 0;
+	left: -1px;
+	margin: auto;
+	width: 196px;
+	height: 44px;
+	line-height: 44px;
+	color: #f0f0f0;
+	font-size: 14px;
+	font-weight: bold;
+	background: #202328;
+	border-radius: 8px;
+	/* z-index: 2; */
 }
 .clock {
 	display: flex;
@@ -30,9 +60,16 @@ html, body {
 	height: 400px;
 	justify-content: space-around;
 	align-items: center;
-	/*border: 1px solid #fff;*/
-	/*设置文字不可点击*/
-	-webkit-user-select:none;
+
+	
+
+	/* 时钟显示区域 */
+	/* width: 800px;
+	height: 400px; */
+	/* border: 1px solid #fff;  */
+	
+	/* 设置文字不可选中 */
+	-webkit-user-select:none; 
 	-moz-user-select:none;
 	-ms-user-select:none;
 	user-select:none;
@@ -42,20 +79,35 @@ html, body {
 	position: relative;
 	width: 360px;
 	height: 360px;
-	color: #b0b0b0;
-	font-size: 360px;
-	line-height: 360px;
-	letter-spacing: -15px;
-	text-align: center;
-	vertical-align: middle;
 	border-radius: 30px;
 	background-color: #101010;
 }
 
+.clock .time .hours,
+.clock .time .minutes {
+	position: absolute;
+	width: 360px;
+	height: 360px;
+	color: #b0b0b0;
+	font-size: 360px;
+	line-height: 360px;
+	letter-spacing: -15px;  
+}
+.clock .time .hours{
+	/* 抵消letter-spacing带来的文字偏移 */
+	left: -7px;  
+}
+.clock .time .minutes {
+	/* 抵消letter-spacing带来的文字偏移 */
+	left: -6px;
+}
+
+/* 中间的隔断 */
 .clock .time:before {
+	z-index: 1;
 	content: "";
 	position: absolute;
-	left: 0;
+	left: 0px;
 	top: 178.5px;
 	width: 360px;
 	height: 3px;

@@ -1,15 +1,15 @@
 (function() {
     var model = {
         time: {},
-        isPm: true,
-        lastestMinutes: undefined
+        isPm: false, // 默认24小时制
+        lastestMinutes: undefined,
+        toastTime: 1.8 // 单位秒,取一位小数
     };
 
 
     var octopus = {
         init: function() {
             octopus.getCurrentTime(model.time);
-            
             view.init();
         },
         getCurrentTime: function(timeObj) {
@@ -44,8 +44,11 @@
                 if (model.isPm) {
                     octopus.translatePm(model.time);
                 };
+                if (model.toastTime > 0) {
+                    model.toastTime = model.toastTime - 0.1;
+                };
                 view.render();
-            }, 100)
+            }, 100);
         },
         togglePm: function() {
             model.isPm = !model.isPm;
@@ -59,16 +62,16 @@
         init: function() {
             view.hoursElem = document.getElementById("hours");
             view.minutesElem = document.getElementById("minutes");
-            view.pmElem = document.getElementById("pm");           
+            view.pmElem = document.getElementById("pm"); 
+            view.messageElem = document.getElementById("message");
             view.fullscreenElem = document.getElementById("fullscreen");
             view.documentElem = document.documentElement;
-
             view.hoursElem.innerText = model.time.hours;
             view.minutesElem.innerText = model.time.minutes;
+            view.messageElem.innerText =  "按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏";
             view.hoursElem.addEventListener("click", function() {
                 octopus.togglePm();
             });
-
 
             document.onkeydown = function(event) {
                 var code = event.keyCode;
@@ -81,11 +84,7 @@
                     }       
                 };
             };
-            if (model.isPm) {
-                view.showPm();
-            }else {
-                view.hidePm();
-            };
+
             octopus.updateTime();
         },
         render: function() {
@@ -100,7 +99,10 @@
             if (view.minutesElem.innerText != model.time.minutes) {
                 view.minutesElem.innerText = model.time.minutes;
             };
-
+            if(model.toastTime <=0 ){
+                view.hideMessage();
+                // model.toastTime=5;
+            }
         },
         showPm: function() {
             // console.log(view.hoursElem.innerText);
@@ -108,6 +110,13 @@
         },
         hidePm: function() {
             view.pmElem.style.display = 'none';
+        },
+        showMessage: function() {
+            // console.log(view.hoursElem.innerText);
+            view.messageElem.style.display = 'block';
+        },
+        hideMessage: function() {
+            view.messageElem.style.display = 'none';
         }
         
     };

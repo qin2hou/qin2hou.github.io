@@ -6,14 +6,23 @@
 	<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+	<div id="message" class="message">按“Enter”打开全屏</div>
 	<div class="fullscreen" id="fullscreen">
 		<div class="clock" id="clock">
-			<div id="hours" class="time hours" title="点击可切换12小时制/24小时制"></div>
-			<div id="minutes" class="time minutes"></div>
-			<div id="pm" class="pm" style="">PM</div>
+			<div class="time" title="点击切换12/24小时制">
+				<div id="hours" class="hours"></div>
+			</div>
+			<div class="time">
+				<div id="minutes" class="minutes"></div>
+			</div>
+			<div id="pm" class="pm">PM</div>
 		</div>
 	</div>
-	
+	<audio autoplay loop width="100px" height="100px">
+  		<source src="/source/soft_rain_01.mp3" type="audio/mpeg">
+  		<source src="/source/soft_rain_01.ogg" type="audio/ogg">
+  		<embed width="100px" height="100px" src="/source/soft_rain_01.mp3" autostart="true" loop="true" hidden="true">
+	</audio>
 	<script type="text/javascript" src="js/script.js"></script>
 </body>
 </html>
