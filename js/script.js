@@ -4,7 +4,8 @@
         isMilitaryTime: true, // 默认24小时制
         timeAbbr: "",
         lastestMinutes: undefined,
-        toastTime: 1.8 // 单位秒,取一位小数
+        toastTime: 1.8, // 单位秒,取一位小数
+        isPlay: false
     };
 
 
@@ -65,6 +66,10 @@
                 octopus.translateTwelveHour(model.time);
             }
             view.render();
+        },
+        toggleMusic: function(){
+            model.isPlay = !model.isPlay;
+            //console.log("playing...");
         }
     };
     var view = {
@@ -73,6 +78,8 @@
             view.minutesElem = document.getElementById("minutes");
             view.pmElem = document.getElementById("pm"); 
             view.messageElem = document.getElementById("message");
+            view.bgmElem = document.getElementById("bgm");
+            view.audioElem = document.getElementById("softRain");
             view.fullscreenElem = document.getElementById("fullscreen");
             view.documentElem = document.documentElement;
             view.hoursElem.innerText = model.time.hours;
@@ -80,6 +87,9 @@
             view.messageElem.innerText =  "按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏";
             view.hoursElem.addEventListener("click", function() {
                 octopus.toggleHourSystems();
+            });
+            view.bgmElem.addEventListener("click", function() {
+                octopus.toggleMusic();
             });
 
             document.onkeydown = function(event) {
@@ -102,6 +112,11 @@
             }else {
                 view.showAbbr();
             };
+            if (model.isPlay) {
+                view.playBgm();
+            } else {
+                view.pauseBgm();
+            }
             if (view.hoursElem.innerText != model.time.hours) {
                 view.hoursElem.innerText = model.time.hours;
             };
@@ -123,6 +138,14 @@
         },
         hideMessage: function() {
             view.messageElem.style.display = 'none';
+        },
+        playBgm: function(){
+            view.audioElem.play();
+            view.bgmElem.style.backgroundColor = "red";
+        },
+        pauseBgm: function(){
+            view.audioElem.pause();
+            view.bgmElem.style.backgroundColor = "gray";
         }
         
     };
