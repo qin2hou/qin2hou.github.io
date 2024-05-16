@@ -168,6 +168,11 @@ html, body {
 
 .poem {
 	position: relative;
+	/* 设置文字不可选中 */
+	-webkit-user-select:none; 
+	-moz-user-select:none;
+	-ms-user-select:none;
+	user-select:none;
 	
 }
 .poem-text {
@@ -176,17 +181,13 @@ html, body {
 	border:3.5px solid #000;
 	border-radius: 8px;
 	
-	/* 设置文字不可选中 */
-	-webkit-user-select:none; 
-	-moz-user-select:none;
-	-ms-user-select:none;
-	user-select:none;
+	
 
 	font-size: 28px;
 	text-align: left;
 	/* overflow-y: scroll; */
 }
-.poem:hover {
+.poem-text:hover {
 	cursor: pointer;
 }
 .poem-time {

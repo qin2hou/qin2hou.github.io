@@ -9,17 +9,22 @@
         style: ["clock","poem","todoList"],
         styleType: 1,
         todoList: [],
-        poemObj: {},
-        poemNumber: 0,
-        poemText: "",
+        poemAddress: "/source/poem_en.json",
+        poemObj: {}, // json文件
+        poemNumber: 0, // 诗歌序号
+        poemQuantities: 0, // 诗歌数量
+        poemObjName: "",
+        poemText: "Nice to meet you!",
         poemCoordinate:[100, 200], // 诗歌显示的初始坐标
+        refreshInterval: 100, // 单位毫秒
+        poemRefreshInterval: 10, // 单位秒
     };
 
 
     var octopus = {
         init: function() {
             octopus.getCurrentTime(model.time);
-            octopus.getPoemText();
+            octopus.getPoemText(model.poemAddress);
             octopus.getTodoListText();
             view.init();
         },
@@ -56,7 +61,7 @@
             }
             return timeObj;
         },
-        updateTime: function() {
+        updateTime: function(time) {
             var t = setInterval(function() {
                 model.lastestMinutes = model.time.minutes;
                 octopus.getCurrentTime(model.time);
@@ -66,8 +71,15 @@
                 if (model.toastTime > 0) {
                     model.toastTime = model.toastTime - 0.1;
                 };
+                if (model.poemRefreshInterval > 0){
+                    model.poemRefreshInterval = model.poemRefreshInterval - 0.1;
+                } else if(model.time.seconds == "00" ||  model.poemRefreshInterval == "0"){
+                    octopus.togglePoemNumber();
+                    model.poemRefreshInterval = 60;
+                }
+                
                 view.render();
-            }, 100); // 默认100ms刷新一次
+            }, time); 
         },
         toggleHourSystems: function() {
             model.isMilitaryTime = !model.isMilitaryTime;
@@ -76,14 +88,17 @@
             }
             view.render();
         },
-        getPoemText: function(){
+        getPoemText: function(addr){
             const xhr = new XMLHttpRequest();
-            xhr.open('get', '/source/poem.json', true);
+            model.poemObjName = model.time.hours+":"+model.time.minutes;
+            xhr.open('get', addr, true);
             xhr.onreadystatechange = function(){
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     const jsonStr = xhr.responseText;
                     model.poemObj = JSON.parse(jsonStr);
-                    model.poemText = model.poemObj["kk_quote"][model.poemNumber];
+                    // console.log(model.poemObj);
+                    model.poemQuantities = model.poemObj[model.poemObjName].length;
+                    model.poemText = model.poemObj[model.poemObjName][model.poemNumber];
                 }
             }
             xhr.send();
@@ -104,11 +119,18 @@
             }
         },
         togglePoemNumber: function(){
-            model.poemNumber = Math.floor(Math.random()*499+1);
-            // console.log(model.poemNumber);
+            model.poemNumber = Math.floor(Math.random()*model.poemQuantities);
+            //console.log(model.poemNumber);
+            //console.log(model.poemQuantities);
             model.poemCoordinate[0]= Math.random()*(window.innerWidth-view.poemElem.offsetWidth*1);// 0-页面宽度
             model.poemCoordinate[1]= Math.random()*(window.innerHeight-view.poemElem.offsetHeight*1);// 0-页面高度 
             view.render();
+        },
+        updatePoemPosition: function(time){
+            var t = setInterval(function() {
+                octopus.togglePoemNumber();
+                view.render();
+            }, time); 
         }
     };
     var view = {
@@ -163,9 +185,19 @@
                 };
             };
 
-            octopus.updateTime();
+            octopus.updateTime(model.refreshInterval);
         },
         render: function() {
+
+            if (!model.isPlay) {
+                view.pauseBgm();
+            } else {
+                view.playBgm();
+            }
+            if(model.toastTime <=0 ){
+                view.hideMessage();
+            }
+
             switch(model.styleType){
                 case 0:
                 view.hidePoem();
@@ -184,11 +216,7 @@
                 break;
             }
             
-            if (model.isPlay) {
-                view.playBgm();
-            } else {
-                view.pauseBgm();
-            }
+
 
             if (model.style[model.styleType] == "clock") {
                 view.hoursElem.innerText = model.time.hours;
@@ -205,12 +233,12 @@
                     view.minutesElem.innerText = model.time.minutes;
                 };
             }
-            
+            // if (model.style[model.styleType] == "poem") {
+            //     octopus.updatePoemPosition(model.poemRefreshInterval);
+            // }
 
-            
-            if(model.toastTime <=0 ){
-                view.hideMessage();
-            }
+
+           
         },
         showAbbr: function() {
             view.pmElem.innerText = model.timeAbbr;
@@ -239,8 +267,14 @@
             view.clockElem.style.display = "none";
         },
         showPoem: function(){
-            view.poemElem.innerText = model.poemObj["kk_quote"][model.poemNumber];
+            model.poemObjName = model.time.hours+":"+model.time.minutes;
+            // console.log(model.poemObj);
+            if(JSON.stringify(model.poemObj) !== "{}"){
+                view.poemElem.innerText = model.poemText;
+            } 
+            view.poemElem.innerText = model.poemText;
             view.poemElem.style.display = "block";
+            view.poemTimeElem.style.display = "block";
             model.poemCoordinate[1] = view.poemElem.offsetHeight+model.poemCoordinate[1]>window.innerHeight?window.innerHeight-view.poemElem.offsetHeight*2-100:model.poemCoordinate[1];
             if (model.poemCoordinate[1] < 50) {
                 model.poemCoordinate[1] = 50;
@@ -253,7 +287,7 @@
             view.poemElem.style.top = model.poemCoordinate[1]+"px";  
             
             var ctime = model.time;
-            view.poemTimeElem.innerText = ctime.year + "-" + ctime.month + "-" + ctime.day + " " + ctime.hours + ":"+ ctime.minutes + ":" + ctime.seconds;
+            view.poemTimeElem.innerText = ctime.year + "-" + ctime.month + "-" + ctime.day + "\xa0\xa0\xa0\xa0" + ctime.hours + ":"+ ctime.minutes + ":" + ctime.seconds;
             view.poemTimeElem.style.left = model.poemCoordinate[0]+8+"px";
             view.poemTimeElem.style.top = model.poemCoordinate[1]-20+"px";
 
@@ -264,6 +298,7 @@
         },
         hidePoem: function(){
             view.poemElem.style.display = "none";
+            view.poemTimeElem.style.display = "none";
             view.bodyElem.style.backgroundColor = "black";
             view.messageElem.style.backgroundColor = "#202328";
             view.messageElem.style.color = "#f0f0f0";
