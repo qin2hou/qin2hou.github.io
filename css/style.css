@@ -3,6 +3,10 @@
 	padding: 0;
 	border: 0;
 }
+@font-face {
+	font-family: "Helvetica Condensed Bold";
+	src: url("../font/Helvetica Condensed Bold.ttf");
+}
 html, body {
 	height: 100%;
 	background-color: #000;
@@ -11,15 +15,23 @@ html, body {
 	text-align: center;
 	vertical-align: middle;
 }
+.container {
+	min-width: 800px;
+	min-height: 600px;
+	width: 100%;
+	height: 100%;
+	/* width: 1920px;
+	height: 980px; */
+	/* border: 1px solid red; */
+}
+
 .fullscreen {
 	position: relative;
 	width: 100%;
 	height: 100%;
+	/* border: 1px solid green; */
 }
-@font-face {
-	font-family: "Helvetica Condensed Bold";
-	src: url("../font/Helvetica Condensed Bold.ttf");
-}
+
 .message:before{
 	z-index: 1;
 	content: "";
@@ -32,7 +44,6 @@ html, body {
 	border: 1px solid;
 }
 .message{
-	display: block;
 	position: absolute;
 	top: 52px;
 	right: 0;
@@ -48,49 +59,56 @@ html, body {
 	border-radius: 8px;
 	/* z-index: 2; */
 }
-.bgm {
+
+.button {
 	position: absolute;
-	top: 20px;
-	left: 20px;
-	width: 20px;
-	height: 20px;
+	margin: auto;
+	left: 0;
+	right: 0;
+	bottom: 20px;
+	width: 200px;
+	height: 60px;
+	/* border: 1px solid red; */
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.button .btn{
+	width: 40px;
+	height: 40px;
+	border: 1px solid white;
+	border-radius: 20px;
+	z-index: 5;
+}
+.bgm-btn {
 	background: #b0b0b0;
-	border: 1px solid white;
-	border-radius: 10px;
-	z-index: 5;
 }
-.noteButton {
-	position: absolute;
-	top: 20px;
-	left: 50px;
-	width: 20px;
-	height: 20px;
+.cc-btn {
 	background: #6d81f2;
-	border: 1px solid white;
-	border-radius: 10px;
-	z-index: 5;
 }
-.bgm:hover,
-.noteButton:hover {
-	/* background: #0dff35; */
-	/* background: #ff4c4c; */
+.fs-btn {
+	background: #6df2a2;
+}
+.bgm-btn:hover,
+.cc-btn:hover,
+.fs-btn {
 	cursor: pointer;
 }
+
 .clock {
 	display: none;
 	position: absolute;
-	top: 0;
-	right: 0;
+	top: 0;	
 	bottom: 0;
 	left: 0;
+	right: 0;
 	margin: auto;
-	width: 780px;
+	/* width: 780px; */
+	width: 800px;
+	/* min-width: 780px; */
 	height: 400px;
-	justify-content: space-around;
+	justify-content: space-between;
 	align-items: center;
-
-	
-
 	/* 时钟显示区域 */
 	/* width: 800px;
 	height: 400px; */
@@ -105,8 +123,8 @@ html, body {
 
 .clock .time {
 	position: relative;
-	width: 360px;
-	height: 360px;
+	width: 380px;
+	height: 380px;
 	border-radius: 30px;
 	background-color: #101010;
 }
@@ -114,30 +132,24 @@ html, body {
 .clock .time .hours,
 .clock .time .minutes {
 	position: absolute;
+	/* 抵消letter-spacing带来的文字偏移, 文本宽度要减去文本缩进量*/
 	width: 360px;
-	height: 360px;
+	/* height: 380px; */
 	color: #b0b0b0;
 	font-size: 360px;
-	line-height: 360px;
-	letter-spacing: -15px;  
-}
-.clock .time .hours{
-	/* 抵消letter-spacing带来的文字偏移 */
-	left: -7px;  
-}
-.clock .time .minutes {
-	/* 抵消letter-spacing带来的文字偏移 */
-	left: -6px;
+	line-height: 380px;
+	text-align: center;
+	letter-spacing: -20px;  
 }
 
-/* 中间的隔断 */
+/* 翻页轴用黑线代替 */
 .clock .time:before {
 	z-index: 1;
 	content: "";
 	position: absolute;
 	left: 0px;
-	top: 178.5px;
-	width: 360px;
+	top: 191.5px;
+	width: 380px;
 	height: 3px;
 	background-color: #101010;
 }
@@ -145,7 +157,7 @@ html, body {
 .clock .pm {
 	/*display: none;*/
 	position: absolute;
-	left: 30px;
+	left: 28px;
 	bottom: 60px;
 	font-size: 30px;
 	color: #b0b0b0;
@@ -155,18 +167,12 @@ html, body {
 }
 
 .poem {
+	position: relative;
+	
+}
+.poem-text {
 	position: absolute;
-	padding: 40px;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	margin: auto;
-	width: 400px;
-	/* height: 240px; 做不到自适应 */
-	height: 240px;
-	align-items: center;
-
+	padding: 50px;
 	border:3.5px solid #000;
 	border-radius: 8px;
 	
@@ -176,12 +182,15 @@ html, body {
 	-ms-user-select:none;
 	user-select:none;
 
-	font-size: 36px;
+	font-size: 28px;
 	text-align: left;
-	overflow-y: scroll;
+	/* overflow-y: scroll; */
 }
 .poem:hover {
 	cursor: pointer;
+}
+.poem-time {
+	position: absolute;
 }
 
 .todoList {

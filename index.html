@@ -7,22 +7,33 @@
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-	<div id="message" class="message"></div>
-	<div id="bgm" class="bgm" title="打开/关闭背景音"></div>
-	<div id="noteButton" class="noteButton" title="切换时钟"></div>
-	<div class="fullscreen" id="fullscreen">
-		<div class="clock" id="clock">
-			<div class="time" title="点击切换12/24小时制">
-				<div id="hours" class="hours"></div>
-			</div>
-			<div class="time">
-				<div id="minutes" class="minutes"></div>
-			</div>
-			<div id="pm" class="pm"></div>
+	<div id="container" class="container">
+		<div id="message" class="message"></div>
+		<div id="button" class="button">
+			<div id="bgm-btn" class="bgm-btn btn" title="打开/关闭背景音"></div>
+			<div id="cc-btn" class="cc-btn btn" title="切换时钟"></div>
+			<div id="fs-btn" class="fs-btn btn" title="打开全屏"></div>
 		</div>
-		<div id="poem" class="poem"></div>
-		<div id="todoList" class="todoList"></div>
+		<div class="fullscreen" id="fullscreen">
+			<div class="clock" id="clock">
+				<div class="time" title="点击切换12/24小时制">
+					<div id="hours" class="hours"></div>
+				</div>
+				<div class="time">
+					<div id="minutes" class="minutes"></div>
+				</div>
+				<div id="pm" class="pm"></div>
+			</div>
+			
+			<div id="poem" class="poem">
+				<div id="poem-time" class="poem-time"></div>
+				<div id="poem-text" class="poem-text"></div>
+			</div>
+			
+			<div id="todoList" class="todoList"></div>
+		</div>
 	</div>
+	
 	<audio id="softRain" autoplay loop width="100px" height="100px">
   		<source src="source/soft_rain_01.mp3" type="audio/mpeg">
   		<source src="source/soft_rain_01.ogg" type="audio/ogg">

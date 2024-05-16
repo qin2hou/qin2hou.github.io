@@ -8,10 +8,11 @@
         isPlay: false,
         style: ["clock","poem","todoList"],
         styleType: 1,
-        poemText: "",
         todoList: [],
         poemObj: {},
-        poemNumber: 0
+        poemNumber: 0,
+        poemText: "",
+        poemCoordinate:[100, 200], // 诗歌显示的初始坐标
     };
 
 
@@ -82,15 +83,11 @@
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     const jsonStr = xhr.responseText;
                     model.poemObj = JSON.parse(jsonStr);
-                    //console.log(model.poemObj);
-                    // model.poemNumber = Math.floor(Math.random()*100+1);
-                    // console.log(model.poemNumber);
                     model.poemText = model.poemObj["kk_quote"][model.poemNumber];
                 }
             }
             xhr.send();
 
-            // model.poemText = "hello there...";
         },
         getTodoListText: function(){
             model.todoList = ["添加poem显示","拆分样式表","修改刷新逻辑"];
@@ -107,8 +104,10 @@
             }
         },
         togglePoemNumber: function(){
-            model.poemNumber = Math.floor(Math.random()*500+1);
-            console.log(model.poemNumber);
+            model.poemNumber = Math.floor(Math.random()*499+1);
+            // console.log(model.poemNumber);
+            model.poemCoordinate[0]= Math.random()*(window.innerWidth-view.poemElem.offsetWidth*1);// 0-页面宽度
+            model.poemCoordinate[1]= Math.random()*(window.innerHeight-view.poemElem.offsetHeight*1);// 0-页面高度 
             view.render();
         }
     };
@@ -118,13 +117,15 @@
             view.minutesElem = document.getElementById("minutes");
             view.pmElem = document.getElementById("pm"); 
             view.messageElem = document.getElementById("message");
-            view.bgmElem = document.getElementById("bgm");
-            view.noteButtonElem = document.getElementById("noteButton");
+            view.bgmButtonElem = document.getElementById("bgm-btn");
+            view.changeClockElem = document.getElementById("cc-btn");
+            view.fsButtonElem = document.getElementById("fs-btn");
             view.audioElem = document.getElementById("softRain");
             view.fullscreenElem = document.getElementById("fullscreen");
             view.bodyElem = document.getElementsByTagName("body")[0];
             view.clockElem = document.getElementById("clock");
-            view.poemElem = document.getElementById("poem");
+            view.poemElem = document.getElementById("poem-text");
+            view.poemTimeElem = document.getElementById("poem-time");
             view.todoListElem = document.getElementById("todoList");
             view.documentElem = document.documentElement;
             // view.todoListElem.innerText = model.todoList;
@@ -133,15 +134,22 @@
             view.hoursElem.addEventListener("click", function() {
                 octopus.toggleHourSystems();
             });
-            view.bgmElem.addEventListener("click", function() {
+            view.bgmButtonElem.addEventListener("click", function() {
                 octopus.toggleMusic();
             });
-            view.noteButtonElem.addEventListener("click", function() {
+            view.changeClockElem.addEventListener("click", function() {
                 octopus.toggleStyle();
             });
             view.poemElem.addEventListener("click",function(){
                 octopus.togglePoemNumber();
-            })
+            });
+            view.fsButtonElem.addEventListener("click", function(){
+                if (!isFullScreen()) {                     
+                    requestFullScreen(view.documentElem);
+                }else {
+                    cancelFullScreen();
+                }
+            });
 
             document.onkeydown = function(event) {
                 var code = event.keyCode;
@@ -218,11 +226,11 @@
         },
         playBgm: function(){
             view.audioElem.play();
-            view.bgmElem.style.backgroundColor = "red";
+            view.bgmButtonElem.style.backgroundColor = "red";
         },
         pauseBgm: function(){
             view.audioElem.pause();
-            view.bgmElem.style.backgroundColor = "#b0b0b0";
+            view.bgmButtonElem.style.backgroundColor = "#b0b0b0";
         },
         showClock: function(){
             view.clockElem.style.display = "flex";
@@ -233,6 +241,22 @@
         showPoem: function(){
             view.poemElem.innerText = model.poemObj["kk_quote"][model.poemNumber];
             view.poemElem.style.display = "block";
+            model.poemCoordinate[1] = view.poemElem.offsetHeight+model.poemCoordinate[1]>window.innerHeight?window.innerHeight-view.poemElem.offsetHeight*2-100:model.poemCoordinate[1];
+            if (model.poemCoordinate[1] < 50) {
+                model.poemCoordinate[1] = 50;
+            }
+            model.poemCoordinate[0] = view.poemElem.offsetWidth+model.poemCoordinate[0]>window.innerWidth?window.innerWidth-view.poemElem.offsetWidth*2-100:model.poemCoordinate[0];
+            if (model.poemCoordinate[0] < 50) {
+                model.poemCoordinate[0] = 50;
+            }
+            view.poemElem.style.left = model.poemCoordinate[0]+"px";
+            view.poemElem.style.top = model.poemCoordinate[1]+"px";  
+            
+            var ctime = model.time;
+            view.poemTimeElem.innerText = ctime.year + "-" + ctime.month + "-" + ctime.day + " " + ctime.hours + ":"+ ctime.minutes + ":" + ctime.seconds;
+            view.poemTimeElem.style.left = model.poemCoordinate[0]+8+"px";
+            view.poemTimeElem.style.top = model.poemCoordinate[1]-20+"px";
+
             view.bodyElem.style.backgroundColor = "#d4dfe2";
             view.messageElem.style.backgroundColor = "#d4dfe2";
             view.messageElem.style.color = "black";
