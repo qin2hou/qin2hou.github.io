@@ -7,8 +7,7 @@
         toastTime: 1.8, // 单位秒,取一位小数，默认值1.8
         isPlay: false,
         musicLib: ["","soft_rain_01.mp3","Luv.mp3"],
-        // 默认音乐，数组角标来判断第几首,undefined 表示无默认音乐
-        musicDefaultNum: 2,
+        musicDefaultNum: 2,// 设置默认音乐，数组角标表示第几首,undefined 表示无默认音乐
         musicSrc: "",
         musicNum: 0,
         style: ["clock","poem","todoList"],
@@ -113,10 +112,8 @@
             model.todoList = ["增加播放器","增加圆形时钟显示","挑选js库","拆分样式表"];
         },
         toggleMusic: function(){
-
             if (model.musicDefaultNum === undefined) {
                 // 默认从第0首开始，空歌曲路径，即不播放
-
                 if (model.musicNum == 0) {
                     model.isPlay = false;
                     model.musicSrc = "";
@@ -127,42 +124,29 @@
                 // 如果歌曲列表结束了，从0开始
                 if (model.musicNum < model.musicLib.length-1){
                     model.musicNum += 1;
-                    console.log(model.musicNum-1);
+                    // 调试用
+                    //console.log(model.musicNum-1); 
                 }else {
-                    console.log(model.musicNum);
+                    // 调试用
+                    //console.log(model.musicNum);
                     model.musicNum = 0;
                 }
-                
-
-                // if (model.musicNum < model.musicLib.length-1){
-                //     model.musicNum += 1;
-                // }else {
-                //     model.musicNum = 0; 
-                // }
-                // if (model.musicNum == 0) {
-                //     model.isPlay = false;
-
-                // } else {
-                //     model.isPlay = true;
-                //     model.musicSrc = "source/" + model.musicLib[model.musicNum];
-                // }
             } else {
-                // 如果有默认歌曲，直接播放，并且把默认歌曲改为undefined,避免再次播放默认歌曲
+                // 如果有默认歌曲，直接播放，并且把默认歌曲改为undefined,避免下次继续播放默认歌曲
                 model.musicSrc = "source/" + model.musicLib[model.musicDefaultNum];
                 model.isPlay = true;
-                console.log(model.musicDefaultNum);
+                // 调试用
+                //console.log(model.musicDefaultNum);
                 model.musicDefaultNum = undefined;                   
             }
-
-            
-            console.log(model.isPlay); 
-            console.log(model.musicSrc); 
+            // 调试用
+            // console.log(model.isPlay); 
+            // console.log(model.musicSrc); 
             if (model.isPlay){
                 view.playBgm();
             } else {
                 view.pauseBgm();
             }
-
         },
         toggleStyle: function(){
             if (model.styleType < model.style.length - 1){
@@ -249,19 +233,31 @@
                     event.preventDefault();
                     octopus.toggleFullscreen();      
                 }else if (code == 70){
+                    event.preventDefault();
                     octopus.toggleMusic();
-                }
+                }else if (code == 9) {
+                    event.preventDefault();
+                    octopus.toggleStyle();                }
             };
-            console.log("Hava a good day~");
+
+            var hello = "";
+            if (model.time.hours > 17) {
+                hello="晚上好~";
+            } else if (model.time.hours > 13) {
+                hello = "下午好~";
+            } else if (model.time.hours > 11) {
+                hello = "中午好~";
+            }else if (model.time.hours > 5) {
+                hello = "早上好~";
+            }else {
+                hello = "所以你是睡了还是没睡...";
+            }
+            
+            console.log(model.time.year+"-"+model.time.month+"-"+model.time.day+" " +model.time.hours+":"+model.time.minutes+":"+model.time.seconds+'\n'+ hello);
             octopus.updateTime(model.refreshInterval);
         },
         render: function() {
 
-            // if (!model.isPlay) {
-            //     view.pauseBgm();
-            // } else {
-            //     view.playBgm();
-            // }
             if(model.toastTime <=0 ){
                 view.hideMessage();
             }
