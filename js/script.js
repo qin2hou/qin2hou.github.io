@@ -5,12 +5,12 @@
         timeAbbr: "",
         lastestMinutes: undefined,
         toastTime: 1.8, // 单位秒,取一位小数，默认值1.8
-        isPlay: false,
+        isPlay: true,
         musicLib: ["","soft_rain_01.mp3","Luv.mp3"],
         musicSrc: "source/Luv.mp3",
-        musicNum: 0,
+        musicNum: 2,
         style: ["clock","poem","todoList"],
-        styleType: 1,
+        styleType: 0,
         todoList: [],
         poemAddress: "/source/poem_en.json",
         poemObj: {}, // json文件
@@ -108,7 +108,7 @@
 
         },
         getTodoListText: function(){
-            model.todoList = ["增加播放器","增加圆形时钟显示","挑选js库"];
+            model.todoList = ["增加播放器","增加圆形时钟显示","挑选js库","拆分样式表"];
         },
         toggleMusic: function(){
             if (model.musicNum < model.musicLib.length) {
@@ -146,6 +146,18 @@
             model.poemCoordinate[1]= Math.random()*(window.innerHeight-view.poemElem.offsetHeight*1);// 0-页面高度 
             view.render();
         },
+        toggleFullscreen: function(){
+            if (!isFullScreen()) {                     
+                requestFullScreen(view.documentElem);
+                view.fsButtonElem.classList.remove("grey");
+                view.fsButtonElem.classList.add("blue");
+                
+            }else {
+                cancelFullScreen();                
+                // view.fsButtonElem.classList.remove("blue");
+                view.fsButtonElem.classList.add("grey");
+            }
+        }
         // updatePoemPosition: function(time){
         //     var t = setInterval(function() {
         //         octopus.togglePoemNumber();
@@ -159,6 +171,7 @@
             view.minutesElem = document.getElementById("minutes");
             view.pmElem = document.getElementById("pm"); 
             view.messageElem = document.getElementById("message");
+
             view.bgmButtonElem = document.getElementById("bgm-btn");
             view.changeClockElem = document.getElementById("cc-btn");
             view.fsButtonElem = document.getElementById("fs-btn");
@@ -174,12 +187,15 @@
 
             view.audioElem = document.getElementById("softRain");
             model.musicSrc = "Luv.mp3";
-            view.playBgm();
+            if(model.isPlay){
+                view.playBgm();
+            }
 
             view.documentElem = document.documentElement;
             // view.todoListElem.innerText = model.todoList;
             // model.messageElem.style.display = "block";
             view.messageElem.innerText =  "按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏";
+            view.showMessage();
             view.hoursElem.addEventListener("click", function() {
                 octopus.toggleHourSystems();
             });
@@ -193,22 +209,14 @@
                 octopus.togglePoemNumber();
             });
             view.fsButtonElem.addEventListener("click", function(){
-                if (!isFullScreen()) {                     
-                    requestFullScreen(view.documentElem);
-                }else {
-                    cancelFullScreen();
-                }
+                octopus.toggleFullscreen();  
             });
 
             document.onkeydown = function(event) {
                 var code = event.keyCode;
                 if (code == 13) {
                     event.preventDefault();
-                    if (!isFullScreen()) {                     
-                        requestFullScreen(view.documentElem);
-                    }else {
-                        cancelFullScreen();
-                    }       
+                    octopus.toggleFullscreen();      
                 };
             };
             console.log("Hava a good day~");
@@ -281,22 +289,26 @@
         },
         playBgm: function(){
             view.audioElem.src = "source/" + model.musicSrc;
-            // view.audioElem.load();
             view.audioElem.addEventListener('canplaythrough',function(){
                 view.audioElem.play();
             },false);
-           
-            view.bgmButtonElem.style.backgroundColor = "red";
+            view.bgmButtonElem.classList.remove("grey");
+            view.bgmButtonElem.classList.add("red");
         },
         pauseBgm: function(){
             view.audioElem.pause();
-            view.bgmButtonElem.style.backgroundColor = "#b0b0b0";
+            view.bgmButtonElem.classList.remove("red");
+            view.bgmButtonElem.classList.add("grey");            
         },
         showClock: function(){
             view.clockElem.style.display = "flex";
+            view.messageElem.classList.add("message-black");
+
         },
         hideClock: function(){
             view.clockElem.style.display = "none";
+            view.messageElem.classList.remove("message-black");
+
         },
         showPoem: function(){
             model.poemObjName = model.time.hours+":"+model.time.minutes;
@@ -307,6 +319,7 @@
             view.poemElem.innerText = model.poemText;
             view.poemElem.style.display = "block";
             view.poemTimeElem.style.display = "block";
+
             model.poemCoordinate[1] = view.poemElem.offsetHeight+model.poemCoordinate[1]>window.innerHeight?window.innerHeight-view.poemElem.offsetHeight*2-100:model.poemCoordinate[1];
             if (model.poemCoordinate[1] < 50) {
                 model.poemCoordinate[1] = 50;
@@ -320,21 +333,19 @@
             
             var ctime = model.time;
             view.poemTimeElem.innerText = ctime.year + "-" + ctime.month + "-" + ctime.day + "\xa0\xa0\xa0\xa0" + ctime.hours + ":"+ ctime.minutes + ":" + ctime.seconds;
-            view.poemTimeElem.style.left = model.poemCoordinate[0]+8+"px";
-            view.poemTimeElem.style.top = model.poemCoordinate[1]-20+"px";
+            view.poemTimeElem.style.left = model.poemCoordinate[0] + view.poemElem.offsetWidth - 156 + "px";
+            view.poemTimeElem.style.top = model.poemCoordinate[1] + 6 + "px";
 
-            view.bodyElem.style.backgroundColor = "#d4dfe2";
-            view.messageElem.style.backgroundColor = "#d4dfe2";
-            view.messageElem.style.color = "black";
-            view.messageElem.innerText ="\xa0\xa0\xa0\xa0"+"按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏...";
+
+            view.bodyElem.classList.add("body-grey");
+            view.messageElem.classList.add("message-grey");
+            
         },
         hidePoem: function(){
             view.poemElem.style.display = "none";
             view.poemTimeElem.style.display = "none";
-            view.bodyElem.style.backgroundColor = "black";
-            view.messageElem.style.backgroundColor = "#202328";
-            view.messageElem.style.color = "#f0f0f0";
-            view.messageElem.innerText ="按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏";
+            view.bodyElem.classList.remove("body-grey");
+            view.messageElem.classList.remove("message-grey");
         },
         showTodoList: function(){
             // console.log("todo..");
@@ -343,18 +354,13 @@
                 view.todoListElem.innerText += (i+1)+"."+model.todoList[i] + "\n";
             }
             view.todoListElem.style.display = "block";
-            view.todoListElem.style.backgroundColor = "white";
-            view.bodyElem.style.backgroundColor = "#d4dfe2";
-            view.messageElem.style.backgroundColor = "#d4dfe2";
-            view.messageElem.style.color = "black";
-            view.messageElem.innerText ="\xa0\xa0\xa0\xa0"+"按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏...";
+            view.bodyElem.classList.add("body-grey");
+            view.messageElem.classList.add("message-white");
         },
         hideTodoList: function(){
             view.todoListElem.style.display = "none";
-            view.todoListElem.style.backgroundColor = "black";
-            view.messageElem.style.backgroundColor = "#202328";
-            view.messageElem.style.color = "#f0f0f0";
-            view.messageElem.innerText ="按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏";
+            view.bodyElem.classList.remove("body-grey");
+            view.messageElem.classList.remove("message-white");
         }
         
     };
