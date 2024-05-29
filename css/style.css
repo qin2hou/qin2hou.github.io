@@ -283,3 +283,12 @@ html, body {
 	text-align: left;
 	/* z-index:10; */
 }
+.music-player {
+	position: absolute;
+	left: 20px;
+	bottom: 120px;
+	/* width: 200px;
+	height: 200px; */
+	background-color: red;
+	z-index: 100;
+}

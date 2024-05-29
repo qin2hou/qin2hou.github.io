@@ -318,12 +318,13 @@
         },
         playBgm: function(){
 
-            view.audioElem.src = model.musicSrc;
+            // view.audioElem.src = model.musicSrc;
             const audioNodeList = view.audioElem.childNodes;
             console.log(audioNodeList);
             audioNodeList[1].src = model.musicSrc;
             audioNodeList[3].src = model.musicSrc.replace("mp3","ogg");
             audioNodeList[5].src = model.musicSrc;
+            view.audioElem.load();
             view.audioElem.addEventListener('canplaythrough',function(){
                 view.audioElem.play();
             },false);
