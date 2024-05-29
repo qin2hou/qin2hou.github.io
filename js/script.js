@@ -7,6 +7,7 @@
         toastTime: 1.8, // 单位秒,取一位小数，默认值1.8
         isPlay: true,
         musicLib: ["","soft_rain_01.mp3","Luv.mp3"],
+        // 默认音乐，路径和第几首要同时设置
         musicSrc: "source/Luv.mp3",
         musicNum: 2,
         style: ["clock","poem","todoList"],
@@ -121,7 +122,7 @@
             } else {
                 model.isPlay = true;
             }
-            model.musicSrc = model.musicLib[model.musicNum];
+            model.musicSrc = "source/" + model.musicLib[model.musicNum];
 
             //  console.log(model.isPlay);
             if (model.isPlay) {
@@ -186,7 +187,6 @@
 
 
             view.audioElem = document.getElementById("softRain");
-            model.musicSrc = "Luv.mp3";
             if(model.isPlay){
                 view.playBgm();
             }
@@ -288,7 +288,8 @@
             view.messageElem.style.display = 'none';
         },
         playBgm: function(){
-            view.audioElem.src = "source/" + model.musicSrc;
+
+            view.audioElem.src = model.musicSrc;
             view.audioElem.addEventListener('canplaythrough',function(){
                 view.audioElem.play();
             },false);
