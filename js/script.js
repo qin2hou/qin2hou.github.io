@@ -6,6 +6,9 @@
         lastestMinutes: undefined,
         toastTime: 1.8, // 单位秒,取一位小数，默认值1.8
         isPlay: false,
+        musicLib: ["","soft_rain_01.mp3","Luv.mp3"],
+        musicSrc: "source/Luv.mp3",
+        musicNum: 0,
         style: ["clock","poem","todoList"],
         styleType: 1,
         todoList: [],
@@ -105,10 +108,27 @@
 
         },
         getTodoListText: function(){
-            model.todoList = ["添加poem显示","拆分样式表","修改刷新逻辑"];
+            model.todoList = ["增加播放器","增加圆形时钟显示","挑选js库"];
         },
         toggleMusic: function(){
-            model.isPlay = !model.isPlay;
+            if (model.musicNum < model.musicLib.length) {
+                model.musicNum += 1;
+            } else {
+            }
+            if(model.musicNum == model.musicLib.length) {
+                model.isPlay = false;
+                model.musicNum = 0;
+            } else {
+                model.isPlay = true;
+            }
+            model.musicSrc = model.musicLib[model.musicNum];
+
+            //  console.log(model.isPlay);
+            if (model.isPlay) {
+                view.playBgm();
+            } else {
+                view.pauseBgm();
+            }
             //console.log("playing...");
         },
         toggleStyle: function(){
@@ -126,12 +146,12 @@
             model.poemCoordinate[1]= Math.random()*(window.innerHeight-view.poemElem.offsetHeight*1);// 0-页面高度 
             view.render();
         },
-        updatePoemPosition: function(time){
-            var t = setInterval(function() {
-                octopus.togglePoemNumber();
-                view.render();
-            }, time); 
-        }
+        // updatePoemPosition: function(time){
+        //     var t = setInterval(function() {
+        //         octopus.togglePoemNumber();
+        //         view.render();
+        //     }, time); 
+        // }
     };
     var view = {
         init: function() {
@@ -142,13 +162,20 @@
             view.bgmButtonElem = document.getElementById("bgm-btn");
             view.changeClockElem = document.getElementById("cc-btn");
             view.fsButtonElem = document.getElementById("fs-btn");
-            view.audioElem = document.getElementById("softRain");
+
+            
             view.fullscreenElem = document.getElementById("fullscreen");
             view.bodyElem = document.getElementsByTagName("body")[0];
             view.clockElem = document.getElementById("clock");
             view.poemElem = document.getElementById("poem-text");
             view.poemTimeElem = document.getElementById("poem-time");
             view.todoListElem = document.getElementById("todoList");
+
+
+            view.audioElem = document.getElementById("softRain");
+            model.musicSrc = "Luv.mp3";
+            view.playBgm();
+
             view.documentElem = document.documentElement;
             // view.todoListElem.innerText = model.todoList;
             // model.messageElem.style.display = "block";
@@ -184,16 +211,16 @@
                     }       
                 };
             };
-
+            console.log("Hava a good day~");
             octopus.updateTime(model.refreshInterval);
         },
         render: function() {
 
-            if (!model.isPlay) {
-                view.pauseBgm();
-            } else {
-                view.playBgm();
-            }
+            // if (!model.isPlay) {
+            //     view.pauseBgm();
+            // } else {
+            //     view.playBgm();
+            // }
             if(model.toastTime <=0 ){
                 view.hideMessage();
             }
@@ -253,7 +280,12 @@
             view.messageElem.style.display = 'none';
         },
         playBgm: function(){
-            view.audioElem.play();
+            view.audioElem.src = "source/" + model.musicSrc;
+            // view.audioElem.load();
+            view.audioElem.addEventListener('canplaythrough',function(){
+                view.audioElem.play();
+            },false);
+           
             view.bgmButtonElem.style.backgroundColor = "red";
         },
         pauseBgm: function(){
@@ -305,7 +337,7 @@
             view.messageElem.innerText ="按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏";
         },
         showTodoList: function(){
-            console.log("todo..");
+            // console.log("todo..");
             view.todoListElem.innerText = "TODOLIST\n";
             for(i=0;i<=model.todoList.length-1;i++){
                 view.todoListElem.innerText += (i+1)+"."+model.todoList[i] + "\n";
