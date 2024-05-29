@@ -5,11 +5,12 @@
         timeAbbr: "",
         lastestMinutes: undefined,
         toastTime: 1.8, // 单位秒,取一位小数，默认值1.8
-        isPlay: true,
+        isPlay: false,
         musicLib: ["","soft_rain_01.mp3","Luv.mp3"],
-        // 默认音乐，路径和第几首要同时设置
-        musicSrc: "source/Luv.mp3",
-        musicNum: 2,
+        // 默认音乐，数组角标来判断第几首,undefined 表示无默认音乐
+        musicDefaultNum: 2,
+        musicSrc: "",
+        musicNum: 0,
         style: ["clock","poem","todoList"],
         styleType: 0,
         todoList: [],
@@ -112,25 +113,56 @@
             model.todoList = ["增加播放器","增加圆形时钟显示","挑选js库","拆分样式表"];
         },
         toggleMusic: function(){
-            if (model.musicNum < model.musicLib.length) {
-                model.musicNum += 1;
-            } else {
-            }
-            if(model.musicNum == model.musicLib.length) {
-                model.isPlay = false;
-                model.musicNum = 0;
-            } else {
-                model.isPlay = true;
-            }
-            model.musicSrc = "source/" + model.musicLib[model.musicNum];
 
-            //  console.log(model.isPlay);
-            if (model.isPlay) {
+            if (model.musicDefaultNum === undefined) {
+                // 默认从第0首开始，空歌曲路径，即不播放
+
+                if (model.musicNum == 0) {
+                    model.isPlay = false;
+                    model.musicSrc = "";
+                }else{ // 如果不为0，就可以播放对应歌曲
+                    model.isPlay = true;
+                    model.musicSrc = "source/" + model.musicLib[model.musicNum];
+                }
+                // 如果歌曲列表结束了，从0开始
+                if (model.musicNum < model.musicLib.length-1){
+                    model.musicNum += 1;
+                    console.log(model.musicNum-1);
+                }else {
+                    console.log(model.musicNum);
+                    model.musicNum = 0;
+                }
+                
+
+                // if (model.musicNum < model.musicLib.length-1){
+                //     model.musicNum += 1;
+                // }else {
+                //     model.musicNum = 0; 
+                // }
+                // if (model.musicNum == 0) {
+                //     model.isPlay = false;
+
+                // } else {
+                //     model.isPlay = true;
+                //     model.musicSrc = "source/" + model.musicLib[model.musicNum];
+                // }
+            } else {
+                // 如果有默认歌曲，直接播放，并且把默认歌曲改为undefined,避免再次播放默认歌曲
+                model.musicSrc = "source/" + model.musicLib[model.musicDefaultNum];
+                model.isPlay = true;
+                console.log(model.musicDefaultNum);
+                model.musicDefaultNum = undefined;                   
+            }
+
+            
+            console.log(model.isPlay); 
+            console.log(model.musicSrc); 
+            if (model.isPlay){
                 view.playBgm();
             } else {
                 view.pauseBgm();
             }
-            //console.log("playing...");
+
         },
         toggleStyle: function(){
             if (model.styleType < model.style.length - 1){
@@ -187,14 +219,13 @@
 
 
             view.audioElem = document.getElementById("softRain");
-            if(model.isPlay){
-                view.playBgm();
-            }
+
 
             view.documentElem = document.documentElement;
             // view.todoListElem.innerText = model.todoList;
             // model.messageElem.style.display = "block";
-            view.messageElem.innerText =  "按"+"\xa0\xa0\xa0"+"Enter"+ "\xa0\xa0\xa0" +"进入全屏";
+            view.messageElem.innerText =  "按"+"\xa0\xa0\xa0\xa0\xa0\xa0"+"F"+ "\xa0\xa0\xa0\xa0\xa0\xa0" +"开始播放歌曲";
+
             view.showMessage();
             view.hoursElem.addEventListener("click", function() {
                 octopus.toggleHourSystems();
@@ -217,7 +248,9 @@
                 if (code == 13) {
                     event.preventDefault();
                     octopus.toggleFullscreen();      
-                };
+                }else if (code == 70){
+                    octopus.toggleMusic();
+                }
             };
             console.log("Hava a good day~");
             octopus.updateTime(model.refreshInterval);
