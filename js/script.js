@@ -37,7 +37,8 @@ var jsmediatags = window.jsmediatags;
         baseUrl: 'http://127.0.0.1:3000/',
         angle: 0,
         rotateAngle: 0.25,  // 每0.01秒 旋转n度
-        pTimer: {} // 旋转动画定时器
+        pTimer: {}, // 旋转动画定时器
+        currentVolume: 10, // 默认音量,10为最大
     };
 
 
@@ -190,6 +191,14 @@ var jsmediatags = window.jsmediatags;
                 // view.fsButtonElem.classList.remove("blue");
                 view.fsButtonElem.classList.add("grey");
             }
+        },
+        volumeUp: function(elem) {
+            model.currentVolume = Math.min(10, model.currentVolume + 1);
+            elem.volume = model.currentVolume/10;
+        },
+        volumeDown: function(elem) {
+            model.currentVolume = Math.max(0, model.currentVolume - 1);
+            elem.volume = model.currentVolume/10;
         }
         // updatePoemPosition: function(time){
         //     var t = setInterval(function() {
@@ -225,14 +234,18 @@ var jsmediatags = window.jsmediatags;
             view.phonographElem = document.getElementById("phonograph");
             view.powerElem = document.getElementById("power");
             view.infoElem = document.getElementById("info");
+            view.volumeIndicatorElem = document.getElementById("volume-indicator");
             view.platerElem = document.getElementById("plater");
 
             view.documentElem = document.documentElement;
             // view.todoListElem.innerText = model.todoList;
             // model.messageElem.style.display = "block";
             view.messageElem.innerText =  "按"+"\xa0\xa0\xa0\xa0\xa0\xa0"+"F"+ "\xa0\xa0\xa0\xa0\xa0\xa0" +"开始播放歌曲";
-
             view.showMessage();
+
+            view.volumeIndicatorElem.style.top = 102 - model.currentVolume*10 + 'px';
+
+
             view.hoursElem.addEventListener("click", function() {
                 octopus.toggleHourSystems();
             });
@@ -268,7 +281,28 @@ var jsmediatags = window.jsmediatags;
                     octopus.toggleMusic();
                 }else if (code == 9) {
                     event.preventDefault();
-                    octopus.toggleStyle();                }
+                    octopus.toggleStyle(); 
+                } else if (code == 38) {
+                    event.preventDefault();
+                    octopus.volumeUp(view.audioElem);
+                    view.volumeIndicatorElem.style.top = 102 - model.currentVolume*10 + 'px'; 
+                    // console.log(view.audioElem.volume);
+                } else if (code == 40) {
+                    event.preventDefault();
+                    octopus.volumeDown(view.audioElem);
+                    view.volumeIndicatorElem.style.top = 102 - model.currentVolume*10 + 'px'; 
+                    // console.log(view.audioElem.volume);
+                } else if (code == 32) {
+                    event.preventDefault();
+                    if (model.isPlay) {
+                        view.audioElem.pause();
+                        clearInterval(model.pTimer);
+                    } else {
+                        view.audioElem.play();
+                        model.pTimer = setInterval(view.rotatePic, 10);
+                    }
+                    model.isPlay = !model.isPlay;
+                }
             };
 
             var hello = "";

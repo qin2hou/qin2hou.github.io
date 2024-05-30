@@ -300,6 +300,10 @@ html, body {
 
 
 /* 留声机通用样式 & 可变样式 */
+
+:root {
+	--grey-color: rgb(61, 65, 61);
+}
 .pointer:hover {
 	cursor: pointer;
 }
@@ -355,11 +359,30 @@ html, body {
 
 
 .phonograph .info {
-
 	color: red;
 	position: absolute;
 	z-index: 5;
 }
+.phonograph .volumeBar {
+	position: absolute;
+	left: 840px;
+	top: 360px;
+	width: 14px;
+	height: 120px;
+	border-radius: 4px;
+	background: black;
+}
+.phonograph .volumeBar .volume-indicator{
+	position: relative;
+	left: -8px;
+	/* 音量调节范围，top 2-102 */
+	top: 102px;  
+	width: 30px;
+	height: 16px;
+	border-radius: 4px;
+	background: white;
+}
+
 .phonograph .platform {
 	position: absolute;
 	right: 12px;
