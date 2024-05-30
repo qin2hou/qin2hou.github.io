@@ -375,12 +375,13 @@ html, body {
 .phonograph .volumeBar .volume-indicator{
 	position: relative;
 	left: -8px;
-	/* 音量调节范围，top 2-102 */
+	/* 音量调节范围，top=(2,102) */
 	top: 102px;  
 	width: 30px;
 	height: 16px;
 	border-radius: 4px;
 	background: white;
+	/* background-image: linear-gradient(to right, #ffffff4d 0%,#c2c2c22d 2%, #3737374d 50%,#C2C2C22d 98%, #ffffff4d 100%); */
 }
 
 .phonograph .platform {

@@ -24,7 +24,7 @@ var jsmediatags = window.jsmediatags;
         style: ["clock","poem","todoList","phonograph"],
         styleType: 3,
         todoList: [],
-        poemAddress: "/source/poem_en.json",
+        poemAddress: "/source/poem_zh.json",
         poemObj: {}, // json文件
         poemNumber: 0, // 诗歌序号
         poemQuantities: 0, // 诗歌数量
@@ -33,8 +33,9 @@ var jsmediatags = window.jsmediatags;
         poemCoordinate:[100, 200], // 诗歌显示的初始坐标
         refreshInterval: 100, // 单位毫秒
         poemRefreshInterval: 10, // 单位秒
-        // baseUrl : 'https://qin2hou.github.io/',
-        baseUrl: 'http://127.0.0.1:3000/',
+        // 上线项目要记得切换baseUrl
+        baseUrl : 'https://qin2hou.github.io/', 
+        // baseUrl: 'http://127.0.0.1:3000/',
         angle: 0,
         rotateAngle: 0.25,  // 每0.01秒 旋转n度
         pTimer: {}, // 旋转动画定时器
