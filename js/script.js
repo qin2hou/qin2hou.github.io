@@ -1,3 +1,13 @@
+// import { jsmediatag } from './jsmediatags.js'
+// var jsmediatags = require("jsmediatags");
+
+var jsmediatags = window.jsmediatags;
+// console.log(jsmediatags);
+
+
+
+
+
 (function() {
     var model = {
         time: {},
@@ -6,12 +16,13 @@
         lastestMinutes: undefined,
         toastTime: 1.8, // 单位秒,取一位小数，默认值1.8
         isPlay: false,
-        musicLib: ["","soft_rain_01.mp3","Luv.mp3"],
+        musicLib: ["","Sayama_Rain_1.mp3","Luv.mp3","怀念.mp3"],
         musicDefaultNum: 2,// 设置默认音乐，数组角标表示第几首,undefined 表示无默认音乐
         musicSrc: "",
         musicNum: 0,
-        style: ["clock","poem","todoList"],
-        styleType: 0,
+        musicAlbumCover: "",
+        style: ["clock","poem","todoList","pophonograph"],
+        styleType: 3,
         todoList: [],
         poemAddress: "/source/poem_en.json",
         poemObj: {}, // json文件
@@ -22,6 +33,11 @@
         poemCoordinate:[100, 200], // 诗歌显示的初始坐标
         refreshInterval: 100, // 单位毫秒
         poemRefreshInterval: 10, // 单位秒
+        // baseUrl : 'https://qin2hou.github.io/',
+        baseUrl: 'http://127.0.0.1:3000/',
+        angle: 0,
+        rotateAngle: 0.25,  // 每0.01秒 旋转n度
+        pTimer: {} // 旋转动画定时器
     };
 
 
@@ -196,6 +212,8 @@
             
             view.fullscreenElem = document.getElementById("fullscreen");
             view.bodyElem = document.getElementsByTagName("body")[0];
+
+
             view.clockElem = document.getElementById("clock");
             view.poemElem = document.getElementById("poem-text");
             view.poemTimeElem = document.getElementById("poem-time");
@@ -204,6 +222,10 @@
 
             view.audioElem = document.getElementById("softRain");
 
+            view.phonographElem = document.getElementById("phonograph");
+            view.powerElem = document.getElementById("power");
+            view.infoElem = document.getElementById("info");
+            view.platerElem = document.getElementById("plater");
 
             view.documentElem = document.documentElement;
             // view.todoListElem.innerText = model.todoList;
@@ -225,6 +247,15 @@
             });
             view.fsButtonElem.addEventListener("click", function(){
                 octopus.toggleFullscreen();  
+            });
+
+            view.powerElem.addEventListener("click", function(){
+                // view.showSize();
+                octopus.toggleMusic();
+            });
+            view.platerElem.addEventListener("click", function(){
+                // view.showSize();
+                octopus.toggleMusic();
             });
 
             document.onkeydown = function(event) {
@@ -253,6 +284,9 @@
                 hello = "所以你是睡了还是没睡...";
             }
             
+
+            
+
             console.log(model.time.year+"-"+model.time.month+"-"+model.time.day+" " +model.time.hours+":"+model.time.minutes+":"+model.time.seconds+'\n'+ hello);
             octopus.updateTime(model.refreshInterval);
         },
@@ -266,18 +300,26 @@
                 case 0:
                 view.hidePoem();
                 view.hideTodoList();
+                view.hidePhonograph();
                 view.showClock();
                 break;
                 case 1:
                 view.hideClock();
                 view.hideTodoList();
+                view.hidePhonograph();
                 view.showPoem();
                 break;
                 case 2:
                 view.hidePoem();
                 view.hideClock();
+                view.hidePhonograph();
                 view.showTodoList();
                 break;
+                case 3:
+                view.hidePoem();
+                view.hideClock();
+                view.hideTodoList();
+                view.showPhonograph();
             }
             
 
@@ -304,6 +346,12 @@
 
            
         },
+        showSize: function() {
+            const vHeight = document.body.clientHeight;
+            const vWidth = document.body.clientWidth;
+            view.infoElem.innerText = vWidth + "," + vHeight;
+            console.log("v");
+        },
         showAbbr: function() {
             view.pmElem.innerText = model.timeAbbr;
         },
@@ -316,15 +364,53 @@
         hideMessage: function() {
             view.messageElem.style.display = 'none';
         },
+        rotatePic: function(){
+            
+            model.angle += model.rotateAngle;
+            view.platerElem.firstElementChild.style.transform = 'rotate(' + model.angle + 'deg)';
+        },
         playBgm: function(){
 
             // view.audioElem.src = model.musicSrc;
             const audioNodeList = view.audioElem.childNodes;
-            console.log(audioNodeList);
+            // console.log(audioNodeList);
             audioNodeList[1].src = model.musicSrc;
             audioNodeList[3].src = model.musicSrc.replace("mp3","ogg");
             audioNodeList[5].src = model.musicSrc;
             view.audioElem.load();
+            
+
+            jsmediatags.read(model.baseUrl + model.musicSrc,{
+                onSuccess: function(result) {
+                    // console.log(result.tags.picture);
+
+                    if (result.tags.picture) {
+
+                        model.musicAlbumCover = "";
+                        view.platerElem.firstElementChild.src = model.musicAlbumCover;
+                        clearInterval(model.pTimer);
+
+                        const { data, format } = result.tags.picture;
+                        let base64String = "";
+                        for (let i = 0; i < data.length; i++) {
+                          base64String += String.fromCharCode(data[i]);
+                        }
+                        model.musicAlbumCover = `data:${data.format};base64,${window.btoa(base64String)}`;
+                        // 设置旋转动画                        
+                        model.pTimer = setInterval(view.rotatePic, 10);
+                    } else {
+                        model.musicAlbumCover = "";
+                        view.platerElem.firstElementChild.src = model.musicAlbumCover;
+                        clearInterval(model.pTimer);
+                    }
+                    view.platerElem.firstElementChild.src =  model.musicAlbumCover;
+                    // console.log(model.musicAlbumCover);
+                },
+                onError: function(error)  {
+                    console.log(error);
+                }
+
+            });
             view.audioElem.addEventListener('canplaythrough',function(){
                 view.audioElem.play();
             },false);
@@ -333,6 +419,10 @@
         },
         pauseBgm: function(){
             view.audioElem.pause();
+            model.musicAlbumCover = "";
+            // 先清空图片，再停止动画计时
+            view.platerElem.firstElementChild.src = model.musicAlbumCover;
+            clearInterval(model.pTimer);
             view.bgmButtonElem.classList.remove("red");
             view.bgmButtonElem.classList.add("grey");            
         },
@@ -397,10 +487,20 @@
             view.todoListElem.style.display = "none";
             view.bodyElem.classList.remove("body-grey");
             view.messageElem.classList.remove("message-white");
+        },
+        showPhonograph:function(){
+            view.phonographElem.display = "block";
+            view.bodyElem.classList.add("body-white");
+            view.messageElem.classList.add("message-black");
+        },
+        hidePhonograph: function(){
+            view.phonographElem.display = "none";
+            view.bodyElem.classList.remove("body-white");
+            view.messageElem.classList.remove("message-black");
         }
         
     };
-
+    // 设置全屏
     function requestFullScreen(element) {
         if (element.requestFullscreen) {
             element.requestFullscreen();
@@ -445,7 +545,15 @@
         );
     }
 
+
     window.onload = function() {
         octopus.init();
     };
+
+    window.onresize = function(){
+        // view.showSize();
+    };
+
+
+
 })()

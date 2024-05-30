@@ -5,6 +5,7 @@
 	<title>my clock</title>
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+	<script type="text/javascript" src="js/jsmediatags.min.js"></script>
 </head>
 <body>
 	<div id="container" class="container">
@@ -28,9 +29,44 @@
 			<div id="poem" class="poem">
 				<div id="poem-time" class="poem-time"></div>
 				<div id="poem-text" class="poem-text"></div>
-			</div>
-			
+			</div>	
+
 			<div id="todoList" class="todoList"></div>
+
+			<div id="phonograph" class="phonograph">
+				<div id="left" class="left">
+					<div id="info" class="info"></div>
+					<div id="platform" class="platform">
+						<div id="tonearm" class="tonearm"></div>
+						<div id="plater" class="plater pointer">
+							<img src="" alt="">
+						</div>
+						<div id="needle" class="needle"></div>
+					</div>
+				</div>
+				<div id="right" class="right">
+					<div id="logo" class="logo unselect">PLAYER</div>	
+					<div id="p-knob" class="p-knob">
+						<div id="vol-p-knob" class="vol-p-knob knob pointer caption"></div>
+						<div id="vol-p-knob" class="vol-p-knob knob pointer caption"></div>
+						<div id="vol-p-knob" class="vol-p-knob knob pointer caption"></div>
+					</div>
+					<div id="indicator" class="indicator pointer">
+						<div id="line" class="line"></div>
+					</div>
+					<div id="power" class="power pointer">
+						<div id="power-light" class="power-light"></div>
+					</div>
+					<div id="p-button" class="p-button">
+						<div id="ei.aus-btn" class="ei.aus-btn btn pointer caption"></div>
+						<div id="phono-btn" class="phono-btn btn pointer caption"></div>
+						<div id="lw-btn" class="lw-btn btn pointer caption"></div>
+						<div id="mw-btn" class="mw-btn btn pointer caption"></div>
+						<div id="ukw-btn" class="ukw-btn btn pointer caption"></div>
+					</div>
+				</div>
+				
+			</div>
 		</div>
 
 
@@ -44,5 +80,6 @@
 	
 	
 	<script type="text/javascript" src="js/script.js"></script>
+	
 </body>
 </html>
