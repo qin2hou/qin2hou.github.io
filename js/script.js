@@ -21,7 +21,7 @@ var jsmediatags = window.jsmediatags;
         musicSrc: "",
         musicNum: 0,
         musicAlbumCover: "",
-        style: ["clock","poem","todoList","pophonograph"],
+        style: ["clock","poem","todoList","phonograph"],
         styleType: 3,
         todoList: [],
         poemAddress: "/source/poem_en.json",
@@ -350,7 +350,7 @@ var jsmediatags = window.jsmediatags;
             const vHeight = document.body.clientHeight;
             const vWidth = document.body.clientWidth;
             view.infoElem.innerText = vWidth + "," + vHeight;
-            console.log("v");
+            // console.log("v");
         },
         showAbbr: function() {
             view.pmElem.innerText = model.timeAbbr;
@@ -489,12 +489,12 @@ var jsmediatags = window.jsmediatags;
             view.messageElem.classList.remove("message-white");
         },
         showPhonograph:function(){
-            view.phonographElem.display = "block";
+            view.phonographElem.style.display = "flex";
             view.bodyElem.classList.add("body-white");
             view.messageElem.classList.add("message-black");
         },
         hidePhonograph: function(){
-            view.phonographElem.display = "none";
+            view.phonographElem.style.display = "none";
             view.bodyElem.classList.remove("body-white");
             view.messageElem.classList.remove("message-black");
         }
