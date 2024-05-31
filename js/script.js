@@ -15,8 +15,8 @@ var jsmediatags = window.jsmediatags;
         lastestMinutes: undefined,
         toastTime: 1.8, // 单位秒,取一位小数，默认值1.8
         isPlay: false,
-        musicLib: ["","Sayama_Rain_1.mp3","Luv.mp3","怀念.mp3"],
-        musicDefaultNum: 2,// 设置默认音乐，数组角标表示第几首,undefined 表示无默认音乐
+        musicLib: ["水曜日のカンパネラ - Oshichi.mp3","林ゆうき - LEGAL-HIGH.mp3","replus - Solitude.mp3","Robert de Boron,Othello - Prayer Vox feat. Vivian Chen ~infused by Caccini 「Ave Maria」~.mp3","Dynamic Duo,孝琳 - 날개뼈(Hot Wings).mp3","Infinite - Back (Japanese Version).mp3","Skylar Spence - Skylar Spence.mp3", "陈光荣 - Lost Good Things.mp3","KLAYMR,Rauf & Faik - Детство (KLAYMR Remix).mp3","jacobnothubrex. - Trust You.mp3"],
+        musicDefaultNum: undefined,// 设置默认音乐，数组角标表示第几首,undefined 表示无默认音乐
         musicSrc: "",
         musicNum: 0,
         musicAlbumCover: "",
@@ -193,14 +193,10 @@ var jsmediatags = window.jsmediatags;
         },
         toggleMusic: function(){
             if (model.musicDefaultNum === undefined) {
-                // 默认从第0首开始，空歌曲路径，即不播放
-                if (model.musicNum == 0) {
-                    model.isPlay = false;
-                    model.musicSrc = "";
-                }else{ // 如果不为0，就可以播放对应歌曲
-                    model.isPlay = true;
-                    model.musicSrc = "source/" + model.musicLib[model.musicNum];
-                }
+                // 默认从第0首开始
+                model.isPlay = true;
+                model.musicSrc = "source/" + model.musicLib[model.musicNum];
+
                 // 如果歌曲列表结束了，从0开始
                 if (model.musicNum < model.musicLib.length-1){
                     model.musicNum += 1;
@@ -216,6 +212,11 @@ var jsmediatags = window.jsmediatags;
                 model.musicSrc = "source/" + model.musicLib[model.musicDefaultNum];
                 model.isPlay = true;
                 // 调试用
+                if (model.musicDefaultNum <= model.musicLib.length - 2) {
+                    model.musicNum = model.musicDefaultNum + 1;
+                } else {
+                    model.musicNum = 0;
+                }
                 //console.log(model.musicDefaultNum);
                 model.musicDefaultNum = undefined;                   
             }
@@ -289,6 +290,11 @@ var jsmediatags = window.jsmediatags;
             // 初始化音量位置
             view.volumeIndicatorElem.style.top = 102 - model.currentVolume*10 + 'px';
 
+            // 音乐结束时 切换歌曲
+            view.audioElem.addEventListener("ended", function(){
+                octopus.toggleMusic();
+            });
+
             // 添加鼠标点击事件监听
             view.hoursElem.addEventListener("click", function() {
                 octopus.toggleHourSystems();
@@ -308,12 +314,24 @@ var jsmediatags = window.jsmediatags;
                 octopus.toggleFullscreen();  
             });
             view.powerElem.addEventListener("click", function(){
-                // view.showSize();
-                octopus.toggleMusic();
+                if (model.isPlay) {
+                    view.audioElem.pause();
+                    clearInterval(model.pTimer);
+                } else {
+                    view.audioElem.play();
+                    model.pTimer = setInterval(view.rotatePic, 10);
+                }
+                model.isPlay = !model.isPlay;
             });
             view.platerElem.addEventListener("click", function(){
-                // view.showSize();
-                octopus.toggleMusic();
+                if (model.isPlay) {
+                    view.audioElem.pause();
+                    clearInterval(model.pTimer);
+                } else {
+                    view.audioElem.play();
+                    model.pTimer = setInterval(view.rotatePic, 10);
+                }
+                model.isPlay = !model.isPlay;
             });
 
             // 添加键盘快捷键事件监听
@@ -436,6 +454,9 @@ var jsmediatags = window.jsmediatags;
             view.infoElem.innerText = vWidth + "," + vHeight;
             // console.log(vWidth + "," + vHeight);
         },
+        showInfo: function(text){
+            view.infoElem.innerText = text;
+        },
         showAbbr: function() {
             view.pmElem.innerText = model.timeAbbr;
         },
@@ -509,8 +530,6 @@ var jsmediatags = window.jsmediatags;
 
             view.poemTextElem.style.left = model.poemCoordinate[0]+"px";
             view.poemTextElem.style.top = model.poemCoordinate[1]+"px";
-
-
             
         },
         updatePoemTime: function() {
@@ -546,79 +565,80 @@ var jsmediatags = window.jsmediatags;
             view.messageElem.classList.remove("message-black");
         },
         playBgm: function(){
-            // view.audioElem.src = model.musicSrc;
-            const audioNodeList = view.audioElem.childNodes;
+            view.audioElem.src = model.musicSrc;
+            // const audioNodeList = view.audioElem.childNodes;
             // console.log(audioNodeList);
-            audioNodeList[1].src = model.musicSrc;
-            audioNodeList[3].src = model.musicSrc.replace("mp3","ogg");
-            audioNodeList[5].src = model.musicSrc;
+            // audioNodeList[1].src = model.musicSrc;
+
+            model.musicAlbumCover = "";
+            view.platerElem.firstElementChild.src = model.musicAlbumCover;
+            clearInterval(model.pTimer);
+            view.bgmButtonElem.classList.remove("grey");
+            view.bgmButtonElem.classList.add("red");
+
+            // audioNodeList[3].src = model.musicSrc.replace("mp3","ogg");
+            // audioNodeList[5].src = model.musicSrc;
 
             // 修改src之后，要手动加载下，才会更新音乐
             view.audioElem.load();
+            view.audioElem.addEventListener('canplaythrough',function(){
+                view.audioElem.play();
+            },false);
             
 
             // console.log(window.location.host);
             // model.baseUrl = (model.baseUrl == "https://" + window.location.host + "/") ? model.baseUrl : "https://" + window.location.host + "/";
             // console.log(model.baseUrl + model.musicSrc);
 
-            jsmediatags.read(model.baseUrl + model.musicSrc,{
-                onSuccess: function(result) {
-                    // console.log(result.tags.picture);
-                    if (result.tags.picture) {
-
-                        model.musicAlbumCover = "";
-                        view.platerElem.firstElementChild.src = model.musicAlbumCover;
-                        clearInterval(model.pTimer);
-
-                        const { data, format } = result.tags.picture;
-                        let base64String = "";
-                        for (let i = 0; i < data.length; i++) {
-                          base64String += String.fromCharCode(data[i]);
-                        }
-                        model.musicAlbumCover = `data:${data.format};base64,${window.btoa(base64String)}`;
-
-                        // 设置旋转动画                        
-                        model.pTimer = setInterval(view.rotatePic, 10);
-                    } else {
-                        model.musicAlbumCover = "";
-                        view.platerElem.firstElementChild.src = model.musicAlbumCover;
-                        clearInterval(model.pTimer);
-                    }
-                    view.platerElem.firstElementChild.src =  model.musicAlbumCover;
-                    // console.log(model.musicAlbumCover);
-                },
-                onError: function(error)  {
-                    console.log(error);
-                }
-            });
-            // 尝试用blob保存文件 失败，读取失败，看不懂 blobreader 源代码
-            // var blobUrl;
-            // var xhr = new XMLHttpRequest();
-            // xhr.responseType = "blob";
-            // xhr.open("GET", model.baseUrl + model.musicSrc, true);            
-            // xhr.onreadystatechange = function () {
-            //     if (xhr.readyState === 4 && xhr.status === 200) {
-            //         // var data = this.response;
-            //         // model.blob = new Blob([data], { type: "audio/mpeg" });
-            //         model.blob = this.response;
-            //         blobUrl = URL.createObjectURL(model.blob);
-            //         console.log("url:");
-            //         console.log(blobUrl);
-            //         console.log(model.blob);
+            // jsmediatags.read(model.baseUrl + model.musicSrc,{
+            //     onSuccess: function(result) {
+            //         console.log(result);
+            //     },
+            //     onError: function(error)  {
+            //         console.log(error);
             //     }
-            // };
-            // xhr.send();
-            // jsmediatags.read(blobUrl, result => {
-            //     console.log(result.tags);
             // });
 
-            // view.audioElem.addEventListener('canplaythrough',function(){
-            //     view.audioElem.play();
-            // },false);
 
-            view.audioElem.play();
-            view.bgmButtonElem.classList.remove("grey");
-            view.bgmButtonElem.classList.add("red");
+            new jsmediatags.Reader(model.baseUrl + model.musicSrc)
+                .setTagsToRead(["title", "artist", "picture"])
+                .setFileReader(jsmediatags.XhrFileReader)
+                .setTagReader(jsmediatags.ID3v2TagReader)
+                .read({
+                    onSuccess: function(result) {
+                        console.log(result.tags.title, "-", result.tags.artist);
+                        view.showInfo(result.tags.title+"-"+result.tags.artist);
+                        // console.log();
+                        if (result.tags.picture) {
+                            // 转base64
+                            // const { data, format } = result.tags.picture;
+                            // let base64String = "";
+                            // for (let i = 0; i < data.length; i++) {
+                            //   base64String += String.fromCharCode(data[i]);
+                            // }
+                            // model.musicAlbumCover = `data:${data.format};base64,${window.btoa(base64String)}`;
+                            // 转Bolb url
+                            model.musicAlbumCover = URL.createObjectURL(new Blob([new Uint8Array(result.tags.picture.data).buffer]));
+                            view.platerElem.firstElementChild.src =  model.musicAlbumCover;
+
+
+                            // 设置旋转动画                        
+                            model.pTimer = setInterval(view.rotatePic, 10);
+                        } else {
+                            
+                            model.musicAlbumCover = "";
+                            view.platerElem.firstElementChild.src =  model.musicAlbumCover;
+                            clearInterval(model.pTimer);
+                        }
+                        
+                        // console.log(model.musicAlbumCover);
+                    },
+                    onError: function(error)  {
+                        console.log(error);
+                    }
+                });
+
+            
         },
         pauseBgm: function(){
             view.audioElem.pause();

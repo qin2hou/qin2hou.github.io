@@ -352,20 +352,26 @@ html, body {
 	width: 1360px;
 	min-width: 580px;
 	/* border: 1px solid blue; */
+	min-height: 960px;
 }
 .phonograph .right {
 	width: 840px;
 	min-width: 838px;
 	/* border: 1px solid red; */
 	position: relative;
+	min-height: 960px;
 }
 
 
 
 .phonograph .info {
-	color: red;
+	color: var(--grey-color);
 	position: absolute;
-	z-index: 5;
+	top: 740px;
+	width: 100%;
+	font-size: 100px;
+	text-align: center;
+	min-height: 100px;
 }
 .phonograph .volumeBar {
 	position: absolute;
