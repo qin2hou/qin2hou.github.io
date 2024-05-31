@@ -227,15 +227,16 @@ html, body {
 
 .poem {
 	position: relative;
+	width: 100%;
+	height: 100%;
 	/* 设置文字不可选中 */
 	-webkit-user-select:none; 
 	-moz-user-select:none;
 	-ms-user-select:none;
 	user-select:none;
-	
+	z-index: 0;
 }
 .poem-text {
-	display: none;
 	position: absolute;
 	padding: 50px;
 	padding-top: 60px;
@@ -247,6 +248,8 @@ html, body {
 	background-color: #d4dfe2;
 	font-size: 28px;
 	text-align: left;
+
+	box-sizing: border-box;
 	/* overflow-y: scroll; */
 }
 .poem-text:hover {
@@ -254,7 +257,8 @@ html, body {
 }
 .poem-time {
 	position: absolute;
-	z-index: 10;
+	z-index: 1;
+	/* z-index: 10; */
 	/* left: 20px;
 	top: 20px; */
 	/* color: white; */
@@ -334,7 +338,7 @@ html, body {
 
 
 .phonograph {
-	display: flex;
+	display: none;
 	justify-content: flex-start;
 	width: 100%;
 	height: 100%;

@@ -7,7 +7,6 @@ var jsmediatags = window.jsmediatags;
 
 
 
-
 (function() {
     var model = {
         time: {},
@@ -26,12 +25,13 @@ var jsmediatags = window.jsmediatags;
         todoList: [],
         poemAddress: "/source/poem_zh.json",
         poemObj: {}, // json文件
-        poemNumber: 0, // 诗歌序号
-        poemQuantities: 0, // 诗歌数量
-        poemObjName: "",
+        poemObjName: "", // poemObj是按照时间索引的，比如 "00：00" 
+        poemNumber: 0, // 诗歌索引位置
+        poemQuantities: 0, // 每个时间对应的诗歌数量，比如"00：00"，对应有五首诗        
         poemText: "Nice to meet you!",
-        poemCoordinate:[100, 200], // 诗歌显示的初始坐标
-        refreshInterval: 100, // 单位毫秒
+        isPoemTimeChanged: false,
+        poemCoordinate:[100, 100], // 诗歌显示的初始坐标
+        refreshInterval: 100, // 页面刷新间隔时长, 单位毫秒
         poemRefreshInterval: 10, // 单位秒
         // 上线项目要记得切换baseUrl
         baseUrl : 'https://qin2hou.github.io/', 
@@ -40,6 +40,7 @@ var jsmediatags = window.jsmediatags;
         rotateAngle: 0.25,  // 每0.01秒 旋转n度
         pTimer: {}, // 旋转动画定时器
         currentVolume: 10, // 默认音量,10为最大
+        blob: "",
     };
 
 
@@ -49,6 +50,40 @@ var jsmediatags = window.jsmediatags;
             octopus.getPoemText(model.poemAddress);
             octopus.getTodoListText();
             view.init();
+        },
+        updateTime: function(time) {
+            var t = setInterval(function() {
+                // 页面每次刷新要做的事
+                // 1.显示最新的时间
+                octopus.getCurrentTime(model.time);
+
+                if (model.style[model.styleType] == "clock"){
+                    view.updateClock();
+                }
+
+                // 2.toast倒计时
+                if (model.toastTime > 0) {
+                    model.toastTime = model.toastTime - model.refreshInterval / 1000;
+                };
+
+                // 3.诗歌定时刷新内容              
+                // 3.1 每次刷新都更新时间
+                if (view.poemTextElem.offsetWidth != 0) {
+                    view.updatePoemTime();
+                };
+
+                // 3.2 每分钟刷新一次,即秒数等于"00"时 
+                if (model.time.seconds == "00" && !model.isPoemTimeChanged) {
+                    octopus.togglePoem();
+                    view.updatePoemText();
+                    model.isPoemTimeChanged = !model.isPoemTimeChanged;
+                };
+                if (model.time.seconds == "01" && model.isPoemTimeChanged) {
+                    model.isPoemTimeChanged = !model.isPoemTimeChanged;
+                }
+
+                view.render();
+            }, time); 
         },
         getCurrentTime: function(timeObj) {
             let time = new Date();
@@ -83,48 +118,75 @@ var jsmediatags = window.jsmediatags;
             }
             return timeObj;
         },
-        updateTime: function(time) {
-            var t = setInterval(function() {
-                model.lastestMinutes = model.time.minutes;
-                octopus.getCurrentTime(model.time);
-                if (!model.isMilitaryTime) {
-                    octopus.translateTwelveHour(model.time);
-                };
-                if (model.toastTime > 0) {
-                    model.toastTime = model.toastTime - 0.1;
-                };
-                if (model.poemRefreshInterval > 0){
-                    model.poemRefreshInterval = model.poemRefreshInterval - 0.1;
-                } else if(model.time.seconds == "00" ||  model.poemRefreshInterval == "0"){
-                    octopus.togglePoemNumber();
-                    model.poemRefreshInterval = 60;
-                }
-                
-                view.render();
-            }, time); 
-        },
         toggleHourSystems: function() {
             model.isMilitaryTime = !model.isMilitaryTime;
-            if (!model.isMilitaryTime) {         
-                octopus.translateTwelveHour(model.time);
+            view.updateClock();
+        },
+        toggleStyle: function(){
+            if (model.styleType < model.style.length - 1){
+                model.styleType ++;
+            }else {
+                model.styleType = 0;
             }
-            view.render();
         },
         getPoemText: function(addr){
-            const xhr = new XMLHttpRequest();
-            model.poemObjName = model.time.hours+":"+model.time.minutes;
+            const xhr = new XMLHttpRequest();            
             xhr.open('get', addr, true);
             xhr.onreadystatechange = function(){
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     const jsonStr = xhr.responseText;
+                    
+                    // 初始化 poemObj
                     model.poemObj = JSON.parse(jsonStr);
-                    // console.log(model.poemObj);
+                    model.poemObjName = model.time.hours+":"+model.time.minutes;
                     model.poemQuantities = model.poemObj[model.poemObjName].length;
+                    model.poemNumber = Math.floor(Math.random()*model.poemQuantities);
                     model.poemText = model.poemObj[model.poemObjName][model.poemNumber];
+                    // console.log("诗歌加载完成。。。");
+
+
+                    // 加载完成后自动刷新poem   
+                    
+                    if (model.style[model.styleType] == "poem") {
+                        octopus.togglePoem();
+                        view.updatePoemText();
+                        view.updatePoemTime();
+                    }                    
                 }
             }
             xhr.send();
+        },
+        togglePoem: function(){
+            // 随机诗歌
+            model.poemObjName = model.time.hours+":"+model.time.minutes;
+            model.poemQuantities = model.poemObj[model.poemObjName].length;
 
+            // 随机诗歌
+            // model.poemNumber = Math.floor(Math.random()*model.poemQuantities);
+
+            //按顺序切换诗歌
+            if (model.poemNumber < model.poemQuantities - 1) {
+                model.poemNumber += 1;
+            } else {
+                model.poemNumber = 0;
+            }   
+
+
+            // 调试用
+            // console.log(model.poemNumber);
+            // console.log(model.poemQuantities);
+            // model.poemText = model.poemObj[model.poemObjName][model.poemNumber];
+
+            // 随机位置
+            if (view.poemTextElem.offsetWidth == 0) {
+                model.poemCoordinate[0] = Math.floor(Math.random()*window.innerWidth / 2);
+                model.poemCoordinate[1] = Math.floor(Math.random()*window.innerHeight / 2);
+                // console.log("?");
+            } else {
+                model.poemCoordinate[0]= Math.floor(Math.random()*(window.innerWidth-view.poemTextElem.offsetWidth-100));// 0-页面宽度
+                model.poemCoordinate[1]= Math.floor(Math.random()*(window.innerHeight-view.poemTextElem.offsetHeight-100));// 0-页面高度
+            }
+            
         },
         getTodoListText: function(){
             model.todoList = ["增加播放器","增加圆形时钟显示","挑选js库","拆分样式表"];
@@ -166,33 +228,6 @@ var jsmediatags = window.jsmediatags;
                 view.pauseBgm();
             }
         },
-        toggleStyle: function(){
-            if (model.styleType < model.style.length - 1){
-                model.styleType ++;
-            }else {
-                model.styleType = 0;
-            }
-        },
-        togglePoemNumber: function(){
-            model.poemNumber = Math.floor(Math.random()*model.poemQuantities);
-            //console.log(model.poemNumber);
-            //console.log(model.poemQuantities);
-            model.poemCoordinate[0]= Math.random()*(window.innerWidth-view.poemElem.offsetWidth*1);// 0-页面宽度
-            model.poemCoordinate[1]= Math.random()*(window.innerHeight-view.poemElem.offsetHeight*1);// 0-页面高度 
-            view.render();
-        },
-        toggleFullscreen: function(){
-            if (!isFullScreen()) {                     
-                requestFullScreen(view.documentElem);
-                view.fsButtonElem.classList.remove("grey");
-                view.fsButtonElem.classList.add("blue");
-                
-            }else {
-                cancelFullScreen();                
-                // view.fsButtonElem.classList.remove("blue");
-                view.fsButtonElem.classList.add("grey");
-            }
-        },
         volumeUp: function(elem) {
             model.currentVolume = Math.min(10, model.currentVolume + 1);
             elem.volume = model.currentVolume/10;
@@ -200,53 +235,61 @@ var jsmediatags = window.jsmediatags;
         volumeDown: function(elem) {
             model.currentVolume = Math.max(0, model.currentVolume - 1);
             elem.volume = model.currentVolume/10;
+        },
+        toggleFullscreen: function(){
+            if (!isFullScreen()) {                     
+                requestFullScreen(view.documentElem);
+                view.fsButtonElem.classList.remove("grey");
+                view.fsButtonElem.classList.add("blue");
+            }else {
+                cancelFullScreen();                
+                // view.fsButtonElem.classList.remove("blue");
+                view.fsButtonElem.classList.add("grey");
+            }
         }
-        // updatePoemPosition: function(time){
-        //     var t = setInterval(function() {
-        //         octopus.togglePoemNumber();
-        //         view.render();
-        //     }, time); 
-        // }
     };
     var view = {
         init: function() {
-            view.hoursElem = document.getElementById("hours");
-            view.minutesElem = document.getElementById("minutes");
-            view.pmElem = document.getElementById("pm"); 
-            view.messageElem = document.getElementById("message");
+            // DOM绑定
+            view.bodyElem = document.getElementsByTagName("body")[0];
+            view.documentElem = document.documentElement;
+            view.fullscreenElem = document.getElementById("fullscreen");
 
+            view.messageElem = document.getElementById("message");
+            view.audioElem = document.getElementById("softRain");
             view.bgmButtonElem = document.getElementById("bgm-btn");
             view.changeClockElem = document.getElementById("cc-btn");
             view.fsButtonElem = document.getElementById("fs-btn");
 
-            
-            view.fullscreenElem = document.getElementById("fullscreen");
-            view.bodyElem = document.getElementsByTagName("body")[0];
-
-
             view.clockElem = document.getElementById("clock");
-            view.poemElem = document.getElementById("poem-text");
+            view.hoursElem = document.getElementById("hours");
+            view.minutesElem = document.getElementById("minutes");
+            view.pmElem = document.getElementById("pm");
+            
+            view.poemElem = document.getElementById("poem");
             view.poemTimeElem = document.getElementById("poem-time");
+            view.poemTextElem = document.getElementById("poem-text");
+
             view.todoListElem = document.getElementById("todoList");
-
-
-            view.audioElem = document.getElementById("softRain");
-
+            
             view.phonographElem = document.getElementById("phonograph");
             view.powerElem = document.getElementById("power");
             view.infoElem = document.getElementById("info");
+            view.volumeBarElem = document.getElementById("volumeBar");
             view.volumeIndicatorElem = document.getElementById("volume-indicator");
             view.platerElem = document.getElementById("plater");
-
-            view.documentElem = document.documentElement;
+            
             // view.todoListElem.innerText = model.todoList;
             // model.messageElem.style.display = "block";
+
+            // 初始化消息显示
             view.messageElem.innerText =  "按"+"\xa0\xa0\xa0\xa0\xa0\xa0"+"F"+ "\xa0\xa0\xa0\xa0\xa0\xa0" +"开始播放歌曲";
             view.showMessage();
 
+            // 初始化音量位置
             view.volumeIndicatorElem.style.top = 102 - model.currentVolume*10 + 'px';
 
-
+            // 添加鼠标点击事件监听
             view.hoursElem.addEventListener("click", function() {
                 octopus.toggleHourSystems();
             });
@@ -256,13 +299,14 @@ var jsmediatags = window.jsmediatags;
             view.changeClockElem.addEventListener("click", function() {
                 octopus.toggleStyle();
             });
-            view.poemElem.addEventListener("click",function(){
-                octopus.togglePoemNumber();
+            view.poemTextElem.addEventListener("click",function(){
+                octopus.togglePoem();
+                view.updatePoemText();
+                view.updatePoemTime();
             });
             view.fsButtonElem.addEventListener("click", function(){
                 octopus.toggleFullscreen();  
             });
-
             view.powerElem.addEventListener("click", function(){
                 // view.showSize();
                 octopus.toggleMusic();
@@ -272,6 +316,7 @@ var jsmediatags = window.jsmediatags;
                 octopus.toggleMusic();
             });
 
+            // 添加键盘快捷键事件监听
             document.onkeydown = function(event) {
                 var code = event.keyCode;
                 if (code == 13) {
@@ -306,6 +351,23 @@ var jsmediatags = window.jsmediatags;
                 }
             };
 
+            view.volumeBarElem.addEventListener('wheel', function(event){
+                event.preventDefault();
+                console.log(event.deltaY);
+                if (event.deltaY > 0){
+                    octopus.volumeDown(view.audioElem);
+                    view.volumeIndicatorElem.style.top = 102 - model.currentVolume*10 + 'px';
+                } else {                    
+                    octopus.volumeUp(view.audioElem);
+                    view.volumeIndicatorElem.style.top = 102 - model.currentVolume*10 + 'px'; 
+                }
+            },{ passive: false });
+
+
+
+
+
+            // 自定义console.log
             var hello = "";
             if (model.time.hours > 17) {
                 hello="晚上好~";
@@ -318,16 +380,16 @@ var jsmediatags = window.jsmediatags;
             }else {
                 hello = "所以你是睡了还是没睡...";
             }
-            
-
-            
-
             console.log(model.time.year+"-"+model.time.month+"-"+model.time.day+" " +model.time.hours+":"+model.time.minutes+":"+model.time.seconds+'\n'+ hello);
+
+            // 每隔10ms 刷新一下页面
             octopus.updateTime(model.refreshInterval);
         },
         render: function() {
 
-            if(model.toastTime <=0 ){
+            if(model.toastTime > 0 ){
+                view.showMessage();
+            } else {
                 view.hideMessage();
             }
 
@@ -355,158 +417,108 @@ var jsmediatags = window.jsmediatags;
                 view.hideClock();
                 view.hideTodoList();
                 view.showPhonograph();
-            }
-            
-
-
-            if (model.style[model.styleType] == "clock") {
-                view.hoursElem.innerText = model.time.hours;
-                view.minutesElem.innerText = model.time.minutes;
-                if (model.isMilitaryTime) {
-                    view.hideAbbr();
-                }else {
-                    view.showAbbr();
-                };
-                if (view.hoursElem.innerText != model.time.hours) {
-                    view.hoursElem.innerText = model.time.hours;
-                };
-                if (view.minutesElem.innerText != model.time.minutes) {
-                    view.minutesElem.innerText = model.time.minutes;
-                };
+                break;
             }
             // if (model.style[model.styleType] == "poem") {
             //     octopus.updatePoemPosition(model.poemRefreshInterval);
-            // }
-
-
-           
-        },
-        showSize: function() {
-            const vHeight = document.body.clientHeight;
-            const vWidth = document.body.clientWidth;
-            view.infoElem.innerText = vWidth + "," + vHeight;
-            // console.log("v");
-        },
-        showAbbr: function() {
-            view.pmElem.innerText = model.timeAbbr;
-        },
-        hideAbbr: function() {
-            view.pmElem.innerText = "";
+            // }           
         },
         showMessage: function() {
             view.messageElem.style.display = 'block';
         },
         hideMessage: function() {
             view.messageElem.style.display = 'none';
+        },  
+        // 调试窗口尺寸时使用
+        showSize: function() {
+            const vHeight = document.body.clientHeight;
+            const vWidth = document.body.clientWidth;
+            view.infoElem.innerText = vWidth + "," + vHeight;
+            // console.log(vWidth + "," + vHeight);
         },
-        rotatePic: function(){
-            
-            model.angle += model.rotateAngle;
-            view.platerElem.firstElementChild.style.transform = 'rotate(' + model.angle + 'deg)';
+        showAbbr: function() {
+            view.pmElem.innerText = model.timeAbbr;
         },
-        playBgm: function(){
-
-            // view.audioElem.src = model.musicSrc;
-            const audioNodeList = view.audioElem.childNodes;
-            // console.log(audioNodeList);
-            audioNodeList[1].src = model.musicSrc;
-            audioNodeList[3].src = model.musicSrc.replace("mp3","ogg");
-            audioNodeList[5].src = model.musicSrc;
-            view.audioElem.load();
-            
-
-            jsmediatags.read(model.baseUrl + model.musicSrc,{
-                onSuccess: function(result) {
-                    // console.log(result.tags.picture);
-
-                    if (result.tags.picture) {
-
-                        model.musicAlbumCover = "";
-                        view.platerElem.firstElementChild.src = model.musicAlbumCover;
-                        clearInterval(model.pTimer);
-
-                        const { data, format } = result.tags.picture;
-                        let base64String = "";
-                        for (let i = 0; i < data.length; i++) {
-                          base64String += String.fromCharCode(data[i]);
-                        }
-                        model.musicAlbumCover = `data:${data.format};base64,${window.btoa(base64String)}`;
-                        // 设置旋转动画                        
-                        model.pTimer = setInterval(view.rotatePic, 10);
-                    } else {
-                        model.musicAlbumCover = "";
-                        view.platerElem.firstElementChild.src = model.musicAlbumCover;
-                        clearInterval(model.pTimer);
-                    }
-                    view.platerElem.firstElementChild.src =  model.musicAlbumCover;
-                    // console.log(model.musicAlbumCover);
-                },
-                onError: function(error)  {
-                    console.log(error);
-                }
-
-            });
-            view.audioElem.addEventListener('canplaythrough',function(){
-                view.audioElem.play();
-            },false);
-            view.bgmButtonElem.classList.remove("grey");
-            view.bgmButtonElem.classList.add("red");
-        },
-        pauseBgm: function(){
-            view.audioElem.pause();
-            model.musicAlbumCover = "";
-            // 先清空图片，再停止动画计时
-            view.platerElem.firstElementChild.src = model.musicAlbumCover;
-            clearInterval(model.pTimer);
-            view.bgmButtonElem.classList.remove("red");
-            view.bgmButtonElem.classList.add("grey");            
-        },
-        showClock: function(){
+        hideAbbr: function() {
+            view.pmElem.innerText = "";
+        },      
+        showClock: function(){   
             view.clockElem.style.display = "flex";
             view.messageElem.classList.add("message-black");
-
         },
         hideClock: function(){
             view.clockElem.style.display = "none";
             view.messageElem.classList.remove("message-black");
-
+        },
+        updateClock: function() {
+            // 如果不是24小时制,则转换成12小时制,并且角标显示缩写字母
+            if (!model.isMilitaryTime) {
+                octopus.translateTwelveHour(model.time);
+                view.showAbbr();
+            } else {
+                view.hideAbbr();
+            }
+            view.hoursElem.innerText = model.time.hours;
+            view.minutesElem.innerText = model.time.minutes;
         },
         showPoem: function(){
-            model.poemObjName = model.time.hours+":"+model.time.minutes;
-            // console.log(model.poemObj);
-            if(JSON.stringify(model.poemObj) !== "{}"){
-                view.poemElem.innerText = model.poemText;
-            } 
-            view.poemElem.innerText = model.poemText;
+            view.poemTextElem.innerText = model.poemText;
+            view.poemTimeElem.innerText = model.time.year + "-" + model.time.month + "-" + model.time.day + "\xa0\xa0\xa0\xa0" + model.time.hours + ":"+ model.time.minutes + ":" + model.time.seconds;
             view.poemElem.style.display = "block";
+            view.poemTextElem.style.display = "block";
             view.poemTimeElem.style.display = "block";
-
-            model.poemCoordinate[1] = view.poemElem.offsetHeight+model.poemCoordinate[1]>window.innerHeight?window.innerHeight-view.poemElem.offsetHeight*2-100:model.poemCoordinate[1];
-            if (model.poemCoordinate[1] < 50) {
-                model.poemCoordinate[1] = 50;
-            }
-            model.poemCoordinate[0] = view.poemElem.offsetWidth+model.poemCoordinate[0]>window.innerWidth?window.innerWidth-view.poemElem.offsetWidth*2-100:model.poemCoordinate[0];
-            if (model.poemCoordinate[0] < 50) {
-                model.poemCoordinate[0] = 50;
-            }
-            view.poemElem.style.left = model.poemCoordinate[0]+"px";
-            view.poemElem.style.top = model.poemCoordinate[1]+"px";  
-            
-            var ctime = model.time;
-            view.poemTimeElem.innerText = ctime.year + "-" + ctime.month + "-" + ctime.day + "\xa0\xa0\xa0\xa0" + ctime.hours + ":"+ ctime.minutes + ":" + ctime.seconds;
-            view.poemTimeElem.style.left = model.poemCoordinate[0] + view.poemElem.offsetWidth - 156 + "px";
-            view.poemTimeElem.style.top = model.poemCoordinate[1] + 6 + "px";
-
-
             view.bodyElem.classList.add("body-grey");
             view.messageElem.classList.add("message-grey");
-            
         },
         hidePoem: function(){
             view.poemElem.style.display = "none";
+            view.poemTextElem.style.display = "none";
             view.poemTimeElem.style.display = "none";
             view.bodyElem.classList.remove("body-grey");
             view.messageElem.classList.remove("message-grey");
+        },
+        updatePoemText: function() {
+            model.poemObjName = model.time.hours+":"+model.time.minutes;
+            // console.log(model.poemObj);
+
+            // 更新诗歌内容
+            if(JSON.stringify(model.poemObj) !== "{}"){
+                model.poemText = model.poemObj[model.poemObjName][model.poemNumber];
+            }; 
+            view.poemTextElem.innerText = model.poemText;
+
+
+            // 更新显示坐标
+            model.poemCoordinate[0] = ( model.poemCoordinate[0] + view.poemTextElem.offsetWidth > window.innerWidth - 100) ? window.innerWidth - view.poemTextElem.offsetWidth - 100 : model.poemCoordinate[0];
+            if (model.poemCoordinate[0] < 100) {
+                model.poemCoordinate[0] = 100;
+            }
+            model.poemCoordinate[1] = ( model.poemCoordinate[1] + view.poemTextElem.offsetHeight > window.innerHeight - 100) ? window.innerHeight-view.poemTextElem.offsetHeight - 100 : model.poemCoordinate[1];
+            if (model.poemCoordinate[1] < 100) {
+                model.poemCoordinate[1] = 100;
+            }
+            
+            // console.log("model.poemCoordinate" + ":", model.poemCoordinate);
+            // console.log("window.innerWidth" + ":", window.innerWidth);
+            // console.log("window.innerHeight" + ":", window.innerHeight);
+            // console.log("view.poemTextElem.offsetWidth" + ":", view.poemTextElem.offsetWidth);
+            // console.log("view.poemTextElem.offsetHeight" + ":", view.poemTextElem.offsetHeight);
+            // console.log("view.poemTimeElem.offsetWidth" + ":", view.poemTimeElem.offsetWidth);
+            // console.log("view.poemTimeElem.offsetHeight" + ":", view.poemTimeElem.offsetHeight);
+
+
+            view.poemTextElem.style.left = model.poemCoordinate[0]+"px";
+            view.poemTextElem.style.top = model.poemCoordinate[1]+"px";
+
+
+            
+        },
+        updatePoemTime: function() {
+            var ctime = model.time;
+            view.poemTimeElem.innerText = ctime.year + "-" + ctime.month + "-" + ctime.day + "\xa0\xa0\xa0\xa0" + ctime.hours + ":"+ ctime.minutes + ":" + ctime.seconds;
+            
+            view.poemTimeElem.style.left = model.poemCoordinate[0] + view.poemTextElem.offsetWidth - view.poemTimeElem.offsetWidth - 8 + "px";
+            view.poemTimeElem.style.top = model.poemCoordinate[1] + 6 + "px";
         },
         showTodoList: function(){
             // console.log("todo..");
@@ -523,17 +535,105 @@ var jsmediatags = window.jsmediatags;
             view.bodyElem.classList.remove("body-grey");
             view.messageElem.classList.remove("message-white");
         },
-        showPhonograph:function(){
-            view.phonographElem.style.display = "flex";
+        showPhonograph:function(){            
             view.bodyElem.classList.add("body-white");
             view.messageElem.classList.add("message-black");
+            view.phonographElem.style.display = "flex";
         },
         hidePhonograph: function(){
             view.phonographElem.style.display = "none";
             view.bodyElem.classList.remove("body-white");
             view.messageElem.classList.remove("message-black");
-        }
-        
+        },
+        playBgm: function(){
+            // view.audioElem.src = model.musicSrc;
+            const audioNodeList = view.audioElem.childNodes;
+            // console.log(audioNodeList);
+            audioNodeList[1].src = model.musicSrc;
+            audioNodeList[3].src = model.musicSrc.replace("mp3","ogg");
+            audioNodeList[5].src = model.musicSrc;
+
+            // 修改src之后，要手动加载下，才会更新音乐
+            view.audioElem.load();
+            
+
+            // console.log(window.location.host);
+            // model.baseUrl = (model.baseUrl == "https://" + window.location.host + "/") ? model.baseUrl : "https://" + window.location.host + "/";
+            // console.log(model.baseUrl + model.musicSrc);
+
+            jsmediatags.read(model.baseUrl + model.musicSrc,{
+                onSuccess: function(result) {
+                    // console.log(result.tags.picture);
+                    if (result.tags.picture) {
+
+                        model.musicAlbumCover = "";
+                        view.platerElem.firstElementChild.src = model.musicAlbumCover;
+                        clearInterval(model.pTimer);
+
+                        const { data, format } = result.tags.picture;
+                        let base64String = "";
+                        for (let i = 0; i < data.length; i++) {
+                          base64String += String.fromCharCode(data[i]);
+                        }
+                        model.musicAlbumCover = `data:${data.format};base64,${window.btoa(base64String)}`;
+
+                        // 设置旋转动画                        
+                        model.pTimer = setInterval(view.rotatePic, 10);
+                    } else {
+                        model.musicAlbumCover = "";
+                        view.platerElem.firstElementChild.src = model.musicAlbumCover;
+                        clearInterval(model.pTimer);
+                    }
+                    view.platerElem.firstElementChild.src =  model.musicAlbumCover;
+                    // console.log(model.musicAlbumCover);
+                },
+                onError: function(error)  {
+                    console.log(error);
+                }
+            });
+            // 尝试用blob保存文件 失败，读取失败，看不懂 blobreader 源代码
+            // var blobUrl;
+            // var xhr = new XMLHttpRequest();
+            // xhr.responseType = "blob";
+            // xhr.open("GET", model.baseUrl + model.musicSrc, true);            
+            // xhr.onreadystatechange = function () {
+            //     if (xhr.readyState === 4 && xhr.status === 200) {
+            //         // var data = this.response;
+            //         // model.blob = new Blob([data], { type: "audio/mpeg" });
+            //         model.blob = this.response;
+            //         blobUrl = URL.createObjectURL(model.blob);
+            //         console.log("url:");
+            //         console.log(blobUrl);
+            //         console.log(model.blob);
+            //     }
+            // };
+            // xhr.send();
+            // jsmediatags.read(blobUrl, result => {
+            //     console.log(result.tags);
+            // });
+
+            // view.audioElem.addEventListener('canplaythrough',function(){
+            //     view.audioElem.play();
+            // },false);
+
+            view.audioElem.play();
+            view.bgmButtonElem.classList.remove("grey");
+            view.bgmButtonElem.classList.add("red");
+        },
+        pauseBgm: function(){
+            view.audioElem.pause();
+            model.musicAlbumCover = "";
+
+            // 先清空图片，再停止动画计时
+            view.platerElem.firstElementChild.src = model.musicAlbumCover;
+            clearInterval(model.pTimer);
+            view.bgmButtonElem.classList.remove("red");
+            view.bgmButtonElem.classList.add("grey");            
+        },
+        rotatePic: function(){            
+            model.angle += model.rotateAngle;
+            view.platerElem.firstElementChild.style.transform = 'rotate(' + model.angle + 'deg)';
+        } 
     };
     // 设置全屏
     function requestFullScreen(element) {
